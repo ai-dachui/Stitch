@@ -1,0 +1,93 @@
+<h2>三个方案对比</h2>
+<p class="subtitle">基于你的需求画像，推荐方案 B</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>轻量起步型 — "先跑起来"</h3>
+      <p style="margin-bottom:12px">直接采用 <strong>second-brain</strong> 的现成 skill 集，最小改动适配你的 Obsidian。</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>半天内可用，npx skills add 一键安装</li>
+            <li>schema 清晰，4 个 skill 覆盖 ingest/query/lint/setup</li>
+            <li>社区验证，结构稳定</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>局限</h4>
+          <ul>
+            <li>一步到位的 ingest，质量不如两步链式思考</li>
+            <li>无置信度标注，无法追溯知识可信度</li>
+            <li>交叉链接靠 LLM 自由发挥，无系统化评分</li>
+            <li>OpenClaw 兼容需要额外适配</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>定制编译型 — "你的知识编译器"（推荐）</h3>
+      <p style="margin-bottom:12px">以 Karpathy 三层架构为骨架，融合多个项目的最佳实践，为你定制一套 Obsidian + OpenClaw 的知识编译系统。</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>两步链式思考 — 先分析再生成，质量显著更高</li>
+            <li>置信度标注 — 知道哪些是硬事实，哪些是推测</li>
+            <li>系统化交叉链接 — 复合评分自动发现知识连接</li>
+            <li>Lint 健康检查 — 自动发现矛盾、孤页、知识空白</li>
+            <li>OpenClaw 原生兼容，Claude Code 也能用</li>
+            <li>与你现有 Obsidian 体系渐进融合</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>局限</h4>
+          <ul>
+            <li>需要 1-2 天搭建 schema + skill</li>
+            <li>需要你参与 schema 调优</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>活记忆型 — "会呼吸的知识库"</h3>
+      <p style="margin-bottom:12px">在方案 B 基础上，引入 TideMind 的记忆代谢机制：知识会自动衰减、强化、涌现新认知。</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>包含方案 B 的所有优势</li>
+            <li>记忆代谢 — 不重要的自动淡化，重要的自动强化</li>
+            <li>晶体涌现 — 从多条记忆中自动提炼高层洞察</li>
+            <li>发散扫描 — 发现跨领域的意外连接</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>局限</h4>
+          <ul>
+            <li>复杂度高，搭建需要 3-5 天</li>
+            <li>代谢参数需要长期调优</li>
+            <li>TideMind 思路好但生态不成熟（⭐6），风险较高</li>
+            <li>200+ 页面之前很多机制用不上</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:24px; padding:16px; background:rgba(255,255,255,0.05); border-radius:8px;">
+  <h3>我的推荐：方案 B</h3>
+  <p>方案 B 在质量和复杂度之间取得了最好的平衡。两步链式思考和置信度标注是经过多个项目验证的实践，能显著提升知识编译质量。而方案 C 的记忆代谢机制虽然很酷，但在你的知识库积累到一定规模之前（200+ 页面），大部分机制用不上。</p>
+  <p style="margin-top:8px"><strong>建议路径：先用 B 跑起来，积累到 200+ 页面后，再按需引入 C 的代谢机制。</strong></p>
+</div>

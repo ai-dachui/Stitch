@@ -1,0 +1,134 @@
+<h2>各项目核心机制全景</h2>
+<p class="subtitle">21 个项目提炼为 5 个关键维度，点击你感兴趣的</p>
+
+<div class="section">
+  <h3>1. 知识怎么进来（Ingest）</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="ingest-simple" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>一步到位</h3>
+        <p>读源 → 讨论要点 → 写摘要 → 更新相关页面<br><span style="color:#888">简单直接，质量靠 LLM 单次发挥</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="ingest-twostep" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>两步链式思考</h3>
+        <p>Step 1：分析（提取实体/概念/矛盾）→ JSON<br>Step 2：基于分析写页面<br><span style="color:#888">先列提纲再写文章，质量更高</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="ingest-pipeline" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>四阶段管线</h3>
+        <p>inbox → raw → knowledge → wiki<br>自动分类 + 打分 + 判断时效性<br><span style="color:#888">最完整但也最重</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>2. 知识怎么连接（Cross-linking）</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="link-free" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>LLM 自由发挥</h3>
+        <p>写页面时顺手加 [[wikilinks]]<br><span style="color:#888">简单但容易漏</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="link-scored" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>复合评分系统</h3>
+        <p>6 个信号打分，≥6 高置信度加链接<br><span style="color:#888">系统化，不漏不乱</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="link-graph" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>知识图谱 + 社区检测</h3>
+        <p>四信号关联 + Louvain 聚类<br><span style="color:#888">自动发现知识群落</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>3. 知识怎么保持健康（Lint）</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="lint-basic" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>基础检查</h3>
+        <p>破损链接、孤立页面、矛盾、陈旧声明、索引一致性、数据缺口<br><span style="color:#888">够用，每 10 次 ingest 跑一次</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="lint-advanced" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>高级检查 + 来源漂移</h3>
+        <p>加：推测过多警告、碎片化标签检测、PII 检测<br>还能建议"下一步该研究什么"<br><span style="color:#888">更完善，适合长期运营</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>4. 知识怎么活起来（记忆代谢）</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="meta-none" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>不需要，静态编译就够</h3>
+        <p>知识存进去、连起来、定期体检就行<br><span style="color:#888">简单可靠，适合起步</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="meta-crystal" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>晶体涌现</h3>
+        <p>从多条记忆中自动提炼高层洞察<br>"我在三个项目里都遇到了同一种问题"<br><span style="color:#888">让知识产生"化学反应"</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="meta-divergent" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>发散扫描</h3>
+        <p>找没有直接链接但共享邻居的知识对<br>发现跨领域的深层联系<br><span style="color:#888">最有创造力，但需要 200+ 页面</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="meta-full" onclick="toggleSelect(this)">
+      <div class="letter">D</div>
+      <div class="content">
+        <h3>完整代谢（衰减+涌现+发散）</h3>
+        <p>常用的变强、不用的变弱、碰撞产生新认知<br><span style="color:#888">最强大但最复杂，500+ 页面才有意义</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>5. 经验怎么积累（复利工程）</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="compound-yes" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>要 — 解决问题自动文档化</h3>
+        <p>检测到问题解决 → 自动提取经验 → 下次遇到直接调用<br><span style="color:#888">第一次研究，之后只需几分钟</span></p>
+      </div>
+    </div>
+    <div class="option" data-choice="compound-no" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>暂时不需要</h3>
+        <p>先把知识库本身搞好再说</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:24px; padding:16px; background:rgba(255,255,255,0.05); border-radius:8px;">
+  <p style="color:#aaa">多选你感兴趣的机制，或者直接在终端告诉我你的想法。这些机制可以自由组合。</p>
+</div>
