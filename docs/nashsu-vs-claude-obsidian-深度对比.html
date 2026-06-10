@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nashsu/llm_wiki vs claude-obsidian — 深层技术对比</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e8e8ed; line-height: 1.7; }
+.hero { background: linear-gradient(135deg, #1a1a2e 0%, #0f172a 100%); padding: 60px 40px; text-align: center; border-bottom: 1px solid #1e293b; }
+.hero h1 { font-size: 2.4em; font-weight: 800; color: #f1f5f9; margin-bottom: 8px; }
+.hero .vs { font-size: 3em; background: linear-gradient(135deg, #6366f1, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; margin: 8px 0; }
+.hero .subtitle { color: #94a3b8; font-size: 1em; }
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+section { margin-bottom: 56px; }
+h2 { font-size: 1.5em; font-weight: 700; color: #f1f5f9; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #1e293b; }
+h3 { font-size: 1.1em; font-weight: 600; margin: 16px 0 8px; }
+.h3-n { color: #818cf8; }
+.h3-c { color: #34d399; }
+
+/* Two column layout */
+.dual { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .dual { grid-template-columns: 1fr; } }
+.col { background: #1e293b; border-radius: 14px; padding: 20px; border: 1px solid #334155; }
+.col-n { border-top: 3px solid #6366f1; }
+.col-c { border-top: 3px solid #10b981; }
+.col-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.col-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-n { background: #6366f1; }
+.dot-c { background: #10b981; }
+.col-header span { font-weight: 600; color: #f1f5f9; }
+
+/* Steps */
+.steps { counter-reset: step; }
+.step { position: relative; padding-left: 32px; margin-bottom: 10px; font-size: 0.88em; color: #cbd5e1; }
+.step::before { counter-increment: step; content: counter(step); position: absolute; left: 0; top: 0; width: 22px; height: 22px; background: rgba(99,102,241,0.15); color: #818cf8; border-radius: 50%; font-size: 0.75em; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.col-c .step::before { background: rgba(16,185,129,0.15); color: #34d399; }
+.step b { color: #f1f5f9; }
+.step code { background: #0f172a; padding: 1px 5px; border-radius: 4px; font-size: 0.9em; color: #e2e8f0; }
+
+/* Table */
+.comp-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid #334155; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+th { background: #1e293b; padding: 10px 12px; text-align: left; color: #94a3b8; font-weight: 600; border-bottom: 1px solid #334155; }
+td { padding: 9px 12px; border-bottom: 1px solid rgba(30,41,59,0.8); color: #cbd5e1; vertical-align: top; }
+tr:hover td { background: rgba(99,102,241,0.03); }
+td:first-child { color: #f1f5f9; font-weight: 500; min-width: 140px; }
+.win { color: #fbbf24; font-weight: 600; }
+
+/* Info boxes */
+.info-box { background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.2); border-radius: 10px; padding: 14px 16px; margin: 12px 0; font-size: 0.88em; }
+.info-box.green { background: rgba(16,185,129,0.06); border-color: rgba(16,185,129,0.2); }
+.info-box .label { font-weight: 600; color: #818cf8; margin-bottom: 4px; }
+.info-box.green .label { color: #34d399; }
+
+/* Schema code blocks */
+.schema-block { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 14px; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.8em; color: #94a3b8; overflow-x: auto; white-space: pre; margin: 8px 0; }
+.schema-block .key { color: #60a5fa; }
+.schema-block .val { color: #fbbf24; }
+.schema-block .comment { color: #475569; }
+
+/* Verdict section */
+.verdict { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid #334155; border-radius: 20px; padding: 28px; margin-top: 40px; }
+.verdict h2 { border: none; margin-bottom: 16px; }
+.verdict-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.vcard { padding: 16px; border-radius: 12px; }
+.vcard h4 { font-size: 0.92em; margin-bottom: 6px; }
+.vcard p { font-size: 0.84em; color: #94a3b8; }
+.vcard-n { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2); }
+.vcard-n h4 { color: #818cf8; }
+.vcard-c { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+.vcard-c h4 { color: #34d399; }
+.vcard-both { background: rgba(234,179,8,0.06); border: 1px solid rgba(234,179,8,0.2); }
+.vcard-both h4 { color: #fbbf24; }
+
+/* Limit cards */
+.limit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 800px) { .limit-grid { grid-template-columns: 1fr; } }
+.limit-card { background: #1e293b; border-radius: 12px; padding: 16px; border: 1px solid #334155; }
+.limit-card h4 { font-size: 0.9em; margin-bottom: 8px; }
+.limit-card ul { margin-left: 16px; font-size: 0.84em; color: #94a3b8; }
+.limit-card li { margin-bottom: 4px; }
+.lc-n h4 { color: #818cf8; }
+.lc-c h4 { color: #34d399; }
+
+footer { text-align: center; padding: 32px; color: #475569; font-size: 0.82em; border-top: 1px solid #1e293b; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>深层技术对比</h1>
+  <div class="vs">nashsu/llm_wiki — VS — claude-obsidian</div>
+  <p class="subtitle">从 Ingest 流水线到检索策略、从 Schema 设计到规模瓶颈 —— 七个维度逐层拆解</p>
+</div>
+
+<div class="container">
+
+<!-- 1. Ingest Pipeline -->
+<section>
+<h2>① Ingest 编译流水线</h2>
+<p style="color:#94a3b8; margin-bottom:16px;">一个源文件从输入到编译为 Wiki 页面的完整流程。这是两个项目最核心的差异。</p>
+
+<div class="dual">
+<div class="col col-n">
+<div class="col-header"><span class="dot dot-n"></span><span>nashsu/llm_wiki — 两步链式思考（2-4 次 LLM 调用）</span></div>
+<div class="steps">
+  <div class="step"><b>SHA256 哈希检查</b> — 对比 <code>.llm-wiki/ingest-cache.json</code>，重复则跳过</div>
+  <div class="step"><b>PDF 图片提取</b> — Rust <code>pdf-extract</code> 提取嵌入图片，视觉 LLM 生成描述</div>
+  <div class="step"><b>长文档分块</b> — 超过 300K 字符则切块（12K-60K），各自分析后合并</div>
+  <div class="step"><b>第一次 LLM 调用：分析</b> — 读源文件 + index.md + purpose.md → 输出结构化分析（实体/概念/论点/矛盾/建议）</div>
+  <div class="step"><b>第二次 LLM 调用：生成</b> — 基于分析结果，用 <code>---FILE: path---</code> 格式批量产出 wiki 页面</div>
+  <div class="step"><b>原子写入</b> — 用 mutex 锁保护，批量写入文件系统</div>
+  <div class="step"><b>向量嵌入</b>（可选）— 新页面自动切块嵌入 LanceDB</div>
+  <div class="step"><b>第三次 LLM 调用：链接增强</b>（可选）— 读页面+索引，返回 JSON <code>{links: [{term, target}]}</code></div>
+  <div class="step"><b>Review 清理</b> — 自动解决已满足条件的 review items</div>
+</div>
+<div class="info-box">
+  <div class="label">冲突处理</div>
+  分析阶段明确要求"与现有 wiki 是否矛盾？"→ 生成阶段输出 <code>---REVIEW: contradiction---</code> 块 → <code>page-merge.ts</code> 合并已有页面（不覆盖）
+</div>
+</div>
+
+<div class="col col-c">
+<div class="col-header"><span class="dot dot-c"></span><span>claude-obsidian — 单会话连续执行（1 次 LLM 会话）</span></div>
+<div class="steps">
+  <div class="step"><b>MD5 哈希检查</b> — 对比 <code>.raw/.manifest.json</code>，重复则跳过</div>
+  <div class="step"><b>完整阅读源文件</b> — Skill 指令："Do not skim."</div>
+  <div class="step"><b>讨论步骤</b>（交互式）— 询问用户"强调什么？颗粒度？" 可跳过</div>
+  <div class="step"><b>创建来源摘要页</b> → <code>wiki/sources/</code></div>
+  <div class="step"><b>创建/更新实体页</b> — 人物、组织、产品、仓库</div>
+  <div class="step"><b>创建/更新概念页</b> — 重要想法、框架</div>
+  <div class="step"><b>更新领域页</b> + 子索引 <code>_index.md</code></div>
+  <div class="step"><b>更新 overview.md</b>（如大局改变）</div>
+  <div class="step"><b>更新 index.md + hot.md + log.md</b></div>
+  <div class="step"><b>矛盾检查</b> — 在<b>两个</b>冲突页添加 <code>[!contradiction]</code> callout</div>
+</div>
+<div class="info-box green">
+  <div class="label">冲突处理</div>
+  Claude 直接在两个页面都写入 <code>&gt; [!contradiction]</code> callout，包含对方链接和冲突内容。永远不会静默覆盖旧信息。
+</div>
+</div>
+</div>
+
+<div class="info-box" style="margin-top:16px; background:rgba(234,179,8,0.06); border-color:rgba(234,179,8,0.2);">
+  <div class="label" style="color:#fbbf24">核心差异总结</div>
+  <b>nashsu</b>：程序化编排，LLM 输出严格格式化（<code>---FILE:---</code> 块），代码解析后批量写入。可重复、可测试、可缓存。<br>
+  <b>claude-obsidian</b>：LLM 即执行器，Claude Code 直接调用 Read/Write/Edit 工具操作文件。更灵活但不可重复。
+</div>
+</section>
+
+<!-- 2. Schema -->
+<section>
+<h2>② 页面结构与 Schema 设计</h2>
+<div class="dual">
+<div class="col col-n">
+<div class="col-header"><span class="dot dot-n"></span><span>nashsu/llm_wiki</span></div>
+<h3 class="h3-n">页面类型（9 种）</h3>
+<p style="font-size:0.85em; color:#94a3b8">source · entity · concept · comparison · query · synthesis · thesis · methodology · finding</p>
+<h3 class="h3-n">Frontmatter 格式</h3>
+<div class="schema-block"><span class="key">type</span>: <span class="val">entity</span>
+<span class="key">title</span>: <span class="val">"Andrej Karpathy"</span>
+<span class="key">created</span>: <span class="val">2026-04-10</span>
+<span class="key">updated</span>: <span class="val">2026-06-03</span>
+<span class="key">tags</span>: <span class="val">[ai-researcher, openai]</span>
+<span class="key">related</span>: <span class="val">[llm-wiki, vibe-coding]</span>  <span class="comment"># 裸 slug，无 [[]]</span>
+<span class="key">sources</span>: <span class="val">["karpathy-gist.md"]</span>  <span class="comment"># 原始文件名</span></div>
+<h3 class="h3-n">特点</h3>
+<ul style="font-size:0.85em; color:#94a3b8; margin-left:16px;">
+  <li><code>related</code> 用裸 kebab-case slug（无双括号、无路径）</li>
+  <li>页面类型更多（thesis/methodology/finding/synthesis）</li>
+  <li>5 种场景模板预配置 purpose.md + schema.md</li>
+  <li>用户可在 schema.md 自定义页面类型和目录</li>
+</ul>
+</div>
+<div class="col col-c">
+<div class="col-header"><span class="dot dot-c"></span><span>claude-obsidian</span></div>
+<h3 class="h3-c">页面类型（8 种）</h3>
+<p style="font-size:0.85em; color:#94a3b8">source · entity · concept · domain · comparison · question · overview · meta</p>
+<h3 class="h3-c">Frontmatter 格式</h3>
+<div class="schema-block"><span class="key">type</span>: <span class="val">entity</span>
+<span class="key">title</span>: <span class="val">"Andrej Karpathy"</span>
+<span class="key">created</span>: <span class="val">2026-04-07</span>
+<span class="key">updated</span>: <span class="val">2026-06-03</span>
+<span class="key">tags</span>:
+  - <span class="val">ai-researcher</span>
+  - <span class="val">openai</span>
+<span class="key">status</span>: <span class="val">mature</span>  <span class="comment"># seed/developing/mature/evergreen</span>
+<span class="key">related</span>:
+  - <span class="val">"[[LLM Wiki]]"</span>  <span class="comment"># 完整 wikilink 格式</span>
+<span class="key">sources</span>:
+  - <span class="val">"[[.raw/articles/karpathy-gist.md]]"</span>
+<span class="key">entity_type</span>: <span class="val">person</span>  <span class="comment"># 类型专属字段</span>
+<span class="key">role</span>: <span class="val">"AI researcher, OpenAI co-founder"</span>
+<span class="key">confidence</span>: <span class="val">high</span></div>
+<h3 class="h3-c">特点</h3>
+<ul style="font-size:0.85em; color:#94a3b8; margin-left:16px;">
+  <li><code>related</code> 用完整 <code>[[wikilink]]</code> 格式（Obsidian Properties 兼容）</li>
+  <li>有 <code>status</code> 生命周期（seed→developing→mature→evergreen）</li>
+  <li>有 <code>confidence</code>（high/medium/low）标注知识可信度</li>
+  <li>类型专属字段更丰富（entity_type/complexity/verdict 等）</li>
+  <li>4 种方法论模式（LYT/PARA/Zettelkasten/通用）</li>
+  <li>6 种用途模式（Website/GitHub/Business/Personal/Research/Book）</li>
+</ul>
+</div>
+</div>
+</section>
+
+<!-- 3. Query / Retrieval -->
+<section>
+<h2>③ 查询与检索策略</h2>
+<div class="dual">
+<div class="col col-n">
+<div class="col-header"><span class="dot dot-n"></span><span>nashsu — 四阶段检索管线</span></div>
+<div class="steps">
+  <div class="step"><b>分词搜索</b> — 英文词分割+停用词；中文 CJK bigram。标题匹配 +10 分</div>
+  <div class="step"><b>向量语义搜索</b>（可选 LanceDB）— chunk 级嵌入，余弦相似度，RRF 融合</div>
+  <div class="step"><b>图谱扩展</b> — 搜索结果为种子，四信号模型 2-hop 扩展（衰减）</div>
+  <div class="step"><b>预算控制 + 组装</b> — 50% wiki 页面 / 5% 索引 / 15% 保留 / 30% 历史+系统</div>
+</div>
+<div class="info-box">
+  <div class="label">Token 预算管理</div>
+  显式 <code>context-budget.ts</code> 分配器。可配 4K-1M token 窗口。按 relevance 分数排序页面，逐页加入直到预算耗尽。每页截断上限 = 30% × pageBudget（最低 5K 字符）。
+</div>
+</div>
+<div class="col col-c">
+<div class="col-header"><span class="dot dot-c"></span><span>claude-obsidian — 三模式 + 可选混合检索</span></div>
+<h3 class="h3-c">快速模式（~1,500 tokens）</h3>
+<p style="font-size:0.85em; color:#94a3b8">只读 hot.md → 如果能回答就直接回答 → 否则扫 index.md</p>
+<h3 class="h3-c">标准模式（~3,000 tokens）</h3>
+<p style="font-size:0.85em; color:#94a3b8">hot.md → index.md → 读 3-5 个相关页面 → 跟随 wikilinks 深度 2 → 综合</p>
+<h3 class="h3-c">深度模式（~8,000+ tokens）</h3>
+<p style="font-size:0.85em; color:#94a3b8">读所有相关页面（不跳过）→ 提供网络搜索 → 结果存回 wiki</p>
+<h3 class="h3-c">wiki-retrieve（v1.7 可选升级）</h3>
+<p style="font-size:0.85em; color:#94a3b8">BM25 top-20 → 余弦重排序 → top-5。三层上下文前缀：Anthropic API（Haiku）/ claude CLI / 合成免费层。</p>
+<div class="info-box green">
+  <div class="label">Token 预算管理</div>
+  无显式分配器。依赖 Claude Code 原生上下文管理 + Skill 指令约束（"读 3-5 页"）。Hot Cache（~500 词）是核心省 token 手段。
+</div>
+</div>
+</div>
+</section>
+
+<!-- 4. Maintenance -->
+<section>
+<h2>④ 维护与 Lint 健康检查</h2>
+<div class="dual">
+<div class="col col-n">
+<div class="col-header"><span class="dot dot-n"></span><span>nashsu — 结构化检查 + LLM 语义分析</span></div>
+<h3 class="h3-n">代码级检查（无 LLM）</h3>
+<ul style="font-size:0.85em; color:#94a3b8; margin-left:16px;">
+  <li>孤立页面（0 个入站链接）</li>
+  <li>断开链接（指向不存在页面）</li>
+  <li>无出站链接（不引用任何页面）</li>
+</ul>
+<h3 class="h3-n">LLM 辅助</h3>
+<ul style="font-size:0.85em; color:#94a3b8; margin-left:16px;">
+  <li><code>dedup.ts</code> — 三阶段去重（提取摘要→LLM 检测分组→合并+重写链接）</li>
+  <li><code>runSemanticLint</code> — LLM 做深层语义分析</li>
+  <li><code>sweep-reviews.ts</code> — 自动清理已满足条件的 review items</li>
+  <li><code>source-lifecycle.ts</code> — 级联删除（删源→清实体→清索引→清死链）</li>
+</ul>
+<h3 class="h3-n">触发方式</h3>
+<p style="font-size:0.85em; color:#94a3b8">手动触发（Lint 面板按钮）。无自动/定时 lint。</p>
+</div>
+<div class="col col-c">
+<div class="col-header"><span class="dot dot-c"></span><span>claude-obsidian — 10 类全覆盖检查</span></div>
+<ul style="font-size:0.85em; color:#94a3b8; margin-left:16px;">
+  <li>① 孤立页面 — 无入站链接</li>
+  <li>② 死链接 — 指向不存在的页面</li>
+  <li>③ <b>陈旧声明</b> — 被更新来源矛盾的旧断言</li>
+  <li>④ <b>缺失页面</b> — 多处提到但没有独立页面的概念</li>
+  <li>⑤ <b>缺失交叉引用</b> — 提到实体但未添加链接</li>
+  <li>⑥ Frontmatter 缺失字段</li>
+  <li>⑦ 空白章节</li>
+  <li>⑧ 陈旧索引条目</li>
+  <li>⑨ 地址验证（DragonScale，可选）</li>
+  <li>⑩ <b>语义去重</b> — ollama nomic-embed-text 余弦相似度 ≥0.90 报错，0.80-0.90 待审</li>
+</ul>
+<h3 class="h3-c">输出</h3>
+<p style="font-size:0.85em; color:#94a3b8"><code>wiki/meta/lint-report-YYYY-MM-DD.md</code>，分级别（可自动修复 / 需人工审核）</p>
+<h3 class="h3-c">触发方式</h3>
+<p style="font-size:0.85em; color:#94a3b8">手动触发（"lint the wiki"）。建议每 10-15 次 ingest 后运行一次。</p>
+</div>
+</div>
+</section>
+
+<!-- 5. Cross-linking -->
+<section>
+<h2>⑤ 交叉链接策略</h2>
+<div class="dual">
+<div class="col col-n">
+<div class="col-header"><span class="dot dot-n"></span><span>nashsu — 三重机制 + 量化评分</span></div>
+<h3 class="h3-n">机制一：Ingest 时 LLM 生成</h3>
+<p style="font-size:0.85em; color:#94a3b8">生成 prompt 指示 LLM 在页面正文使用 [[wikilink]]，在 frontmatter 填写 related 字段。</p>
+<h3 class="h3-n">机制二：Post-ingest 链接增强</h3>
+<p style="font-size:0.85em; color:#94a3b8"><code>enrich-wikilinks.ts</code> — 额外 LLM 调用，返回 JSON → 代码做首次出现替换。<b>每个目标只链接一次</b>，只链接索引中已有的页面。</p>
+<h3 class="h3-n">机制三：四信号图谱发现隐式关系</h3>
+<ul style="font-size:0.85em; color:#94a3b8; margin-left:16px;">
+  <li>直接链接 ×3.0</li>
+  <li>来源重叠 ×4.0（最高权重！共享原始素材 = 强关联）</li>
+  <li>Adamic-Adar ×1.5（共同邻居，按度数加权）</li>
+  <li>类型亲和 ×1.0（含跨类型亲和矩阵）</li>
+</ul>
+<div class="info-box">
+  <div class="label">防过度/不足链接</div>
+  过度：每个目标只链接首次出现，只链接已有页面。<br>
+  不足：post-ingest enrichment 专门补漏。<br>
+  隐式关系：图谱信号发现非显式链接的关联（如共享来源但未互链的页面）。
+</div>
+</div>
+<div class="col col-c">
+<div class="col-header"><span class="dot dot-c"></span><span>claude-obsidian — LLM 判断 + Lint 兜底</span></div>
+<h3 class="h3-c">机制一：Ingest 时 LLM 判断</h3>
+<p style="font-size:0.85em; color:#94a3b8">Skill 指令："在正文中对所有已知实体/概念使用 [[wikilink]]。" Claude 根据阅读 index.md 和现有页面做判断。</p>
+<h3 class="h3-c">机制二：Lint 检查 #5 兜底</h3>
+<p style="font-size:0.85em; color:#94a3b8">"缺失交叉引用"检查 — 发现正文提到但未链接的实体，自动修复可添加链接。</p>
+<h3 class="h3-c">无量化评分系统</h3>
+<p style="font-size:0.85em; color:#94a3b8">完全依赖 LLM 的自然语言理解判断什么该链接。没有权重、阈值或评分矩阵。</p>
+<div class="info-box green">
+  <div class="label">防过度/不足链接</div>
+  不足：Lint #5 兜底检测。<br>
+  过度：无显式防护，依赖 LLM 判断力 + 上下文约束（"只读 3-5 页"间接限制链接密度）。<br>
+  无隐式关系发现机制。
+</div>
+</div>
+</div>
+</section>
+
+<!-- 6. Integration -->
+<section>
+<h2>⑥ 可扩展性与集成</h2>
+<div class="comp-wrap">
+<table>
+<thead><tr><th>集成维度</th><th style="color:#818cf8">nashsu/llm_wiki</th><th style="color:#34d399">claude-obsidian</th></tr></thead>
+<tbody>
+<tr><td>本地 API</td><td><code>127.0.0.1:19828</code>（token 保护）— health/projects/files/search/graph</td><td>无独立 API（通过 Obsidian Local REST API 插件或 filesystem）</td></tr>
+<tr><td>MCP Server</td><td>✓ 完整实现：status/projects/files/read/search/graph/rescan</td><td>可选（mcp-obsidian / mcpvault / filesystem 三选一）</td></tr>
+<tr><td>Agent Skill</td><td>独立 repo <code>nashsu/llm_wiki_skill</code>，npx 安装</td><td>内置 15 个 skill，Claude Code plugin 安装</td></tr>
+<tr><td>Chrome 扩展</td><td class="win">✓ Manifest V3 Web Clipper（Readability.js + Turndown.js）</td><td>无（用 defuddle skill 手动剪藏）</td></tr>
+<tr><td>多文档格式</td><td class="win">PDF · DOCX · PPTX · XLSX · 图片 · 视频</td><td>文本/MD 为主（依赖 Claude 原生文件读取能力）</td></tr>
+<tr><td>LLM 提供商</td><td class="win">6 家：OpenAI/Anthropic/Google/Ollama/Azure/自定义</td><td>Claude 优先（实验性支持 Gemini/Codex/Cursor/Windsurf）</td></tr>
+<tr><td>跨项目引用</td><td>无</td><td class="win">任何项目的 CLAUDE.md 可指向 vault</td></tr>
+<tr><td>多写入安全</td><td>Mutex 锁（单线程队列）</td><td class="win">文件级 advisory lock + Sub-agents 并行</td></tr>
+<tr><td>定制页面类型</td><td>通过 schema.md 自定义</td><td>通过 mode 配置（6 种用途模式）</td></tr>
+<tr><td>Obsidian 深度</td><td>生成 .obsidian/ 配置，vault 兼容</td><td class="win">IS Obsidian vault（CSS/Dataview/Bases/Canvas/Templater/Graph）</td></tr>
+<tr><td>协议</td><td>GPL-3.0（传染性）</td><td class="win">MIT（无限制）</td></tr>
+<tr><td>运行成本</td><td class="win">自带 API key（按调用付费，可用 Ollama 免费）</td><td>需 Claude Code 订阅（$100-200/月）</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- 7. Limitations -->
+<section>
+<h2>⑦ 局限性与已知问题</h2>
+<div class="limit-grid">
+<div class="limit-card lc-n">
+<h4>nashsu/llm_wiki 的问题</h4>
+<ul>
+  <li><b>PDF ingest 不稳定</b> — 同一 PDF 时成时败</li>
+  <li><b>批量 ingest 质量退化</b> — 超过 ~50 个源后 index/overview 停止更新</li>
+  <li><b>中文文件名编码</b> — 被 URL 编码</li>
+  <li><b>Deep Research 并发冲突</b> — 多任务覆盖输出</li>
+  <li><b>安全顾虑</b> — 硬编码 API 端口，缺少 CSP，LLM 写入未校验</li>
+  <li><b>单一自定义模型</b> — 只能配一个 custom endpoint</li>
+  <li><b>无 Hot Cache</b> — 每次 session 无持久上下文</li>
+  <li><b>无跨项目引用</b></li>
+  <li><b>桌面 Only</b> — 无 CLI/终端工作流</li>
+  <li><b>GPL-3.0</b> — 传染性协议，商用需注意</li>
+</ul>
+</div>
+<div class="limit-card lc-c">
+<h4>claude-obsidian 的问题</h4>
+<ul>
+  <li><b>Hook 兼容性</b> — Claude Code v2.1.140+ 的 prompt-type hook 会断</li>
+  <li><b>Lint 即兴执行</b> — 核心检查 1-7 没有固定数据采集方法，Claude 每次跑法不同</li>
+  <li><b>无结构化搜索后端</b> — 依赖 Grep/Glob（wiki-retrieve 可选但需 Python+ollama）</li>
+  <li><b>无独立桌面应用</b> — 必须有 Claude Code 订阅</li>
+  <li><b>无图谱可视化</b> — 依赖 Obsidian 原生 graph view</li>
+  <li><b>无多格式文档支持</b> — 不能直接解析 PDF/DOCX/PPTX</li>
+  <li><b>无 Chrome 剪藏扩展</b></li>
+  <li><b>无社区检测/图谱洞察</b></li>
+  <li><b>无持久 ingest 队列</b>（无崩溃恢复）</li>
+  <li><b>wiki-retrieve 规模上限</b> — >500 页警告，>5000 页失败</li>
+</ul>
+</div>
+</div>
+
+<div class="comp-wrap" style="margin-top:20px">
+<table>
+<thead><tr><th>规模相关</th><th style="color:#818cf8">nashsu</th><th style="color:#34d399">claude-obsidian</th></tr></thead>
+<tbody>
+<tr><td>Ingest 队列</td><td class="win">持久化队列 + 崩溃恢复</td><td>无（单次 session）</td></tr>
+<tr><td>搜索规模</td><td class="win">LanceDB 向量 + sigma.js 数百节点</td><td>BM25 O(N²) in Python，>5000 页失败</td></tr>
+<tr><td>并行 Ingest</td><td>串行（防 LLM 冲突）</td><td>Sub-agents 可并行（文件锁）</td></tr>
+<tr><td>长文档</td><td class="win">自动分块 12K-60K + 合并</td><td>依赖 Claude 原生上下文窗口</td></tr>
+<tr><td>图片处理</td><td class="win">PDF 图片提取 + 视觉 LLM 描述</td><td>Claude 原生视觉（无批量处理）</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- Verdict -->
+<div class="verdict">
+<h2>🎯 Stitch 应该怎么选</h2>
+<p style="color:#94a3b8; margin-bottom:20px;">不是二选一，而是取各自最强的部分组合。两个项目的强项恰好互补。</p>
+
+<div class="verdict-grid">
+  <div class="vcard vcard-n">
+    <h4>从 nashsu 拿编译引擎</h4>
+    <p>两步链式思考 · SHA256 增量 · 四信号图谱 · 长文档分块 · Deep Research · purpose.md 目标约束 · Chrome Web Clipper · 显式 token 预算控制 · 多 LLM 提供商支持</p>
+  </div>
+  <div class="vcard vcard-c">
+    <h4>从 claude-obsidian 拿维护体系</h4>
+    <p>Hot Cache 秒加载 · 10 类 Lint · [!contradiction] 双向标注 · status 生命周期 · confidence 置信度 · 方法论切换 · Hook 四钩子 · Auto-commit · 交互式讨论步骤 · 隐私同意门</p>
+  </div>
+  <div class="vcard vcard-both">
+    <h4>两者都有但实现不同，取更优的</h4>
+    <p><b>去重</b>：nashsu 的 dedup.ts（三阶段）vs claude-obsidian 的语义 tiling → 取 nashsu（更系统化）<br>
+    <b>矛盾处理</b>：nashsu 的 review item vs claude-obsidian 的 callout → 取 claude-obsidian（更直观）<br>
+    <b>MCP</b>：两者都有 → 取 nashsu（更完整的 tool 集）<br>
+    <b>Schema</b>：nashsu 9 类型 vs claude-obsidian 8 类型+lifecycle → 取 claude-obsidian（lifecycle 有价值）</p>
+  </div>
+</div>
+</div>
+
+</div>
+
+<footer>
+  Stitch 项目深度技术调研 · 2026年6月3日<br>
+  nashsu/llm_wiki v0.4.17 · AgriciDaniel/claude-obsidian v1.9.2
+</footer>
+
+</body>
+</html>

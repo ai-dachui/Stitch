@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>claude-obsidian 完整指南 — 能力·用法·原理</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e8e8ed; line-height: 1.7; }
+
+/* Hero */
+.hero { background: linear-gradient(160deg, #0f172a, #1a1a2e, #0f3460); padding: 72px 40px; text-align: center; position: relative; overflow: hidden; border-bottom: 1px solid #1e293b; }
+.hero::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 120%, rgba(16,185,129,0.08), transparent 60%); }
+.hero h1 { font-size: 2.6em; font-weight: 800; background: linear-gradient(135deg, #10b981, #6ee7b7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; position: relative; }
+.hero .sub { color: #94a3b8; margin-top: 12px; font-size: 1.05em; position: relative; }
+.hero .badges { margin-top: 16px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; position: relative; }
+.badge { padding: 4px 12px; border-radius: 20px; font-size: 0.78em; font-weight: 600; }
+.b-g { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.b-p { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+.b-y { background: rgba(234,179,8,0.15); color: #fbbf24; border: 1px solid rgba(234,179,8,0.3); }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+section { margin-bottom: 72px; }
+h2 { font-size: 1.7em; font-weight: 700; color: #f1f5f9; margin-bottom: 24px; text-align: center; }
+h2 .icon { margin-right: 8px; }
+h3 { font-size: 1.1em; font-weight: 600; color: #cbd5e1; margin: 20px 0 8px; }
+p { color: #94a3b8; margin-bottom: 12px; }
+code { background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #e2e8f0; }
+a { color: #34d399; text-decoration: none; }
+
+/* TOC */
+.toc { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px 32px; margin: 32px auto; max-width: 600px; }
+.toc h3 { color: #f1f5f9; margin: 0 0 12px; text-align: center; }
+.toc ol { margin-left: 20px; }
+.toc li { margin-bottom: 6px; }
+.toc a { color: #60a5fa; }
+
+/* Big number cards */
+.big-nums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 32px 0; }
+@media (max-width: 700px) { .big-nums { grid-template-columns: repeat(2, 1fr); } }
+.bn { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 20px; text-align: center; }
+.bn .num { font-size: 2.2em; font-weight: 800; }
+.bn .label { font-size: 0.8em; color: #64748b; margin-top: 4px; }
+.bn-g .num { color: #34d399; }
+.bn-p .num { color: #a78bfa; }
+.bn-y .num { color: #fbbf24; }
+.bn-b .num { color: #60a5fa; }
+
+/* Capability cards */
+.cap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.cap { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 20px; transition: all 0.2s; }
+.cap:hover { border-color: #10b981; transform: translateY(-2px); }
+.cap .cap-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.cap .cap-icon { font-size: 1.6em; }
+.cap .cap-title { font-weight: 700; color: #f1f5f9; font-size: 1em; }
+.cap .cap-body { font-size: 0.85em; color: #94a3b8; }
+.cap .cap-cmd { margin-top: 8px; font-family: monospace; font-size: 0.82em; color: #34d399; background: #0f172a; padding: 4px 10px; border-radius: 6px; display: inline-block; }
+
+/* Architecture diagram */
+.arch { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 20px; padding: 32px; margin: 24px 0; }
+.arch-title { text-align: center; font-weight: 700; color: #f1f5f9; margin-bottom: 20px; }
+.arch-layers { display: flex; flex-direction: column; gap: 12px; max-width: 700px; margin: 0 auto; }
+.arch-row { display: flex; align-items: center; gap: 12px; }
+.arch-label { min-width: 100px; padding: 10px; border-radius: 10px; text-align: center; font-size: 0.82em; font-weight: 700; }
+.arch-content { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: 10px; }
+.arch-item { padding: 5px 10px; border-radius: 6px; font-size: 0.78em; font-weight: 500; }
+.al-hook { background: rgba(239,68,68,0.12); color: #fca5a5; }
+.al-hook .arch-label { background: rgba(239,68,68,0.15); color: #f87171; }
+.al-hook .arch-item { background: rgba(239,68,68,0.08); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); }
+.al-skill { background: rgba(99,102,241,0.12); color: #a5b4fc; }
+.al-skill .arch-label { background: rgba(99,102,241,0.15); color: #818cf8; }
+.al-skill .arch-item { background: rgba(99,102,241,0.08); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.2); }
+.al-wiki { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+.al-wiki .arch-label { background: rgba(16,185,129,0.15); color: #34d399; }
+.al-wiki .arch-item { background: rgba(16,185,129,0.08); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.2); }
+.al-raw { background: rgba(245,158,11,0.12); color: #fcd34d; }
+.al-raw .arch-label { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.al-raw .arch-item { background: rgba(245,158,11,0.08); color: #fcd34d; border: 1px solid rgba(245,158,11,0.2); }
+.al-obs { background: rgba(139,92,246,0.12); color: #c4b5fd; }
+.al-obs .arch-label { background: rgba(139,92,246,0.15); color: #a78bfa; }
+.al-obs .arch-item { background: rgba(139,92,246,0.08); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.2); }
+.arch-arrow { text-align: center; color: #475569; font-size: 1.1em; }
+
+/* Principle section */
+.principle-box { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; margin: 16px 0; }
+.principle-box h4 { color: #f1f5f9; margin-bottom: 12px; font-size: 1em; }
+.principle-box .desc { font-size: 0.88em; color: #94a3b8; margin-bottom: 12px; }
+.vs-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin: 12px 0; }
+.vs-table th { background: #0f172a; padding: 8px 12px; text-align: left; color: #64748b; font-weight: 600; }
+.vs-table td { padding: 8px 12px; border-bottom: 1px solid #1e293b; }
+
+/* Flow diagrams */
+.flow-h { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+.flow-box { padding: 8px 14px; border-radius: 8px; font-size: 0.82em; font-weight: 600; }
+.fb-green { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+.fb-blue { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+.fb-yellow { background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+.fb-red { background: rgba(239,68,68,0.12); color: #fca5a5; border: 1px solid rgba(239,68,68,0.3); }
+.fb-purple { background: rgba(139,92,246,0.12); color: #c4b5fd; border: 1px solid rgba(139,92,246,0.3); }
+.flow-arrow { color: #475569; font-size: 1.3em; }
+
+/* Workflow timeline */
+.wf-timeline { position: relative; padding-left: 40px; margin: 16px 0; }
+.wf-timeline::before { content: ''; position: absolute; left: 16px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(to bottom, #10b981, #6366f1, #f59e0b); }
+.wf-item { position: relative; margin-bottom: 20px; }
+.wf-item::before { content: ''; position: absolute; left: -28px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: #10b981; border: 2px solid #0a0a0f; }
+.wf-item:nth-child(2)::before { background: #6366f1; }
+.wf-item:nth-child(3)::before { background: #f59e0b; }
+.wf-item:nth-child(4)::before { background: #ec4899; }
+.wf-item .wf-when { font-size: 0.8em; color: #64748b; font-weight: 600; }
+.wf-item .wf-what { color: #cbd5e1; font-size: 0.9em; margin-top: 2px; }
+.wf-item .wf-cmd { font-family: monospace; font-size: 0.82em; color: #34d399; margin-top: 4px; }
+
+/* Hook diagram */
+.hook-flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+@media (max-width: 700px) { .hook-flow { grid-template-columns: repeat(2, 1fr); } }
+.hook-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 14px; text-align: center; }
+.hook-card .hk-name { font-weight: 700; font-size: 0.85em; color: #f87171; margin-bottom: 6px; }
+.hook-card .hk-desc { font-size: 0.75em; color: #94a3b8; }
+.hook-card .hk-arrow { color: #475569; margin: 4px 0; }
+
+footer { text-align: center; padding: 32px; color: #475569; font-size: 0.82em; border-top: 1px solid #1e293b; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>claude-obsidian 完整指南</h1>
+  <div class="sub">能力全景 · 日常用法 · 实现原理</div>
+  <div class="badges">
+    <span class="badge b-g">v1.9.2</span>
+    <span class="badge b-p">15 Skills</span>
+    <span class="badge b-y">4 Hooks</span>
+    <span class="badge b-g">MIT 协议</span>
+    <span class="badge b-p">Claude Code Plugin</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- TOC -->
+<div class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#what">这是什么</a></li>
+    <li><a href="#capabilities">完整能力清单</a></li>
+    <li><a href="#architecture">实现原理与架构</a></li>
+    <li><a href="#hooks">Hook 自动化机制</a></li>
+    <li><a href="#daily">日常使用指南</a></li>
+    <li><a href="#advanced">高级功能</a></li>
+  </ol>
+</div>
+
+<!-- Section 1: What -->
+<section id="what">
+<h2><span class="icon">🧠</span> 这是什么</h2>
+
+<p style="text-align:center; font-size:1.1em; color:#cbd5e1; max-width:700px; margin:0 auto 24px;">
+  claude-obsidian 是一个 <b>Claude Code 插件</b>，把你的 Obsidian 笔记库变成一个<b>自组织的 AI 第二大脑</b>。<br>
+  你只管丢素材和问问题，AI 自动完成编译、归档、交叉引用、矛盾标注和持续维护。
+</p>
+
+<div class="principle-box">
+<h4>核心原则：知识编译 vs RAG</h4>
+<table class="vs-table">
+<tr><th></th><th style="color:#ef4444">传统 RAG</th><th style="color:#34d399">LLM Wiki（本项目）</th></tr>
+<tr><td>知识处理时机</td><td>每次查询时临时检索+拼凑</td><td>素材进入时一次性编译，持续维护</td></tr>
+<tr><td>知识积累</td><td>❌ 不积累，每次从零开始</td><td>✅ 复利增长，每次 ingest 更新全图</td></tr>
+<tr><td>交叉引用</td><td>❌ 不存在</td><td>✅ 自动建立 [[wikilinks]]</td></tr>
+<tr><td>矛盾检测</td><td>❌ 不检测</td><td>✅ 自动标注 [!contradiction]</td></tr>
+<tr><td>适用规模</td><td>任意大（靠向量搜索）</td><td>< 500 篇效果最佳</td></tr>
+</table>
+<div class="desc" style="text-align:center; margin-top:12px">
+  <b>类比</b>：RAG = 每次考试从课本临时翻答案 · LLM Wiki = 认真做了笔记，笔记越来越厚越有结构
+</div>
+</div>
+
+<div class="big-nums">
+  <div class="bn bn-g"><div class="num">15</div><div class="label">Skills（能力模块）</div></div>
+  <div class="bn bn-p"><div class="num">4</div><div class="label">Hooks（自动化钩子）</div></div>
+  <div class="bn bn-y"><div class="num">10</div><div class="label">Lint 检查项</div></div>
+  <div class="bn bn-b"><div class="num">4</div><div class="label">方法论模式</div></div>
+</div>
+</section>
+
+<!-- Section 2: Capabilities -->
+<section id="capabilities">
+<h2><span class="icon">⚡</span> 完整能力清单</h2>
+
+<div class="cap-grid">
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">📥</span><span class="cap-title">wiki-ingest — 知识编译</span></div>
+    <div class="cap-body">丢入任何素材（文件/URL/图片），Claude 完整阅读后编译为 8-15 个互联 wiki 页面。自动提取实体、概念、论点。支持去重（MD5 哈希跳过）、批量、图片 OCR。</div>
+    <div class="cap-cmd">ingest 文件名.md</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🔍</span><span class="cap-title">wiki-query — 知识查询</span></div>
+    <div class="cap-body">三种深度：Quick（只读 hot.md，秒回）、Standard（3-5 页综合）、Deep（全库扫描+网络搜索）。带引用回答，不是训练数据。可选 BM25+余弦重排序检索后端。</div>
+    <div class="cap-cmd">what do you know about X?</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🏥</span><span class="cap-title">wiki-lint — 健康检查</span></div>
+    <div class="cap-body">10 类检查：孤页、死链、陈旧声明、缺失页面、缺失引用、frontmatter 空缺、空章节、陈旧索引、地址验证、语义去重。生成报告 + Canvas 地图。</div>
+    <div class="cap-cmd">lint the wiki</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">💾</span><span class="cap-title">save — 对话存档</span></div>
+    <div class="cap-body">把当前对话的精华存为永久 wiki 笔记。自动判断类型（question/concept/comparison），加 frontmatter，更新 index 和 hot cache。好答案不应该消失在聊天记录里。</div>
+    <div class="cap-cmd">/save</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🔬</span><span class="cap-title">autoresearch — 自主研究</span></div>
+    <div class="cap-body">给一个主题，Claude 自动执行多轮搜索→抓取→综合→入库循环。类似 Deep Research，但结果直接写入 wiki 而非只返回文字。用 program.md 定义研究目标和约束。</div>
+    <div class="cap-cmd">/autoresearch AI Agent 记忆系统</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🎨</span><span class="cap-title">canvas — 可视化画布</span></div>
+    <div class="cap-body">在 Obsidian Canvas 上添加图片、文本卡片、PDF、wiki 页面。自动定位到 zone 区域。Lint 时自动生成 overview.canvas 知识地图。</div>
+    <div class="cap-cmd">/canvas add note [[概念名]]</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🧘</span><span class="cap-title">think — 结构化思考</span></div>
+    <div class="cap-body">10 原则思考循环：观察外部→观察内心→倾听→分析→横向连接→系统连接→直觉→接纳→创造→成长。适合架构决策、复杂问题、审计。</div>
+    <div class="cap-cmd">/think 应该用什么架构？</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">📋</span><span class="cap-title">wiki-fold — 日志折叠</span></div>
+    <div class="cap-body">把 log.md 的批量条目折叠为摘要页。纯提取式（不发明信息），结构幂等，dry-run 默认。DragonScale Memory 的机制之一。</div>
+    <div class="cap-cmd">fold the log, dry-run k=3</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🌐</span><span class="cap-title">defuddle — 网页提取</span></div>
+    <div class="cap-body">用 Defuddle CLI 从网页提取干净正文，去除广告、导航、杂乱元素，减少 40-60% token。配合 ingest URL 使用。</div>
+    <div class="cap-cmd">ingest https://example.com</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🔄</span><span class="cap-title">wiki-mode — 方法论切换</span></div>
+    <div class="cap-body">一键切换笔记组织哲学：Generic（通用）、LYT（Linking Your Thinking）、PARA（Projects/Areas/Resources/Archives）、Zettelkasten（卡片盒）。</div>
+    <div class="cap-cmd">bash bin/setup-mode.sh --mode lyt</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🔗</span><span class="cap-title">wiki-retrieve — 混合检索</span></div>
+    <div class="cap-body">可选升级：BM25 稀疏搜索 + nomic-embed-text 余弦重排序。500-token 分块 + 上下文前缀（Anthropic 2024 研究）。适合大库（>100页）。</div>
+    <div class="cap-cmd">bash bin/setup-retrieve.sh</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🖥️</span><span class="cap-title">wiki-cli — Obsidian CLI 传输</span></div>
+    <div class="cap-body">通过 Obsidian CLI（v1.7+原生）直接读写笔记，无需 MCP。支持 read/write/append/search/property:set/backlinks。延迟 <50ms。</div>
+    <div class="cap-cmd">obsidian-cli write "$VAULT" "$NOTE"</div>
+  </div>
+</div>
+</section>
+
+<!-- Section 3: Architecture -->
+<section id="architecture">
+<h2><span class="icon">🏗️</span> 实现原理与架构</h2>
+
+<div class="arch">
+<div class="arch-title">五层系统架构</div>
+<div class="arch-layers">
+  <div class="arch-row al-hook">
+    <div class="arch-label">Hook 层<br><small>自动触发</small></div>
+    <div class="arch-content">
+      <span class="arch-item">SessionStart → 加载 hot.md</span>
+      <span class="arch-item">PostCompact → 恢复上下文</span>
+      <span class="arch-item">PostToolUse → 自动 git commit</span>
+      <span class="arch-item">Stop → 更新 hot cache</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↕</div>
+  <div class="arch-row al-skill">
+    <div class="arch-label">Skill 层<br><small>15 个能力</small></div>
+    <div class="arch-content">
+      <span class="arch-item">wiki-ingest</span>
+      <span class="arch-item">wiki-query</span>
+      <span class="arch-item">wiki-lint</span>
+      <span class="arch-item">save</span>
+      <span class="arch-item">autoresearch</span>
+      <span class="arch-item">canvas</span>
+      <span class="arch-item">think</span>
+      <span class="arch-item">wiki-fold</span>
+      <span class="arch-item">defuddle</span>
+      <span class="arch-item">wiki-mode</span>
+      <span class="arch-item">wiki-retrieve</span>
+      <span class="arch-item">wiki-cli</span>
+      <span class="arch-item">obsidian-markdown</span>
+      <span class="arch-item">obsidian-bases</span>
+      <span class="arch-item">wiki（编排器）</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↕</div>
+  <div class="arch-row al-wiki">
+    <div class="arch-label">Wiki 层<br><small>LLM 维护</small></div>
+    <div class="arch-content">
+      <span class="arch-item">index.md（目录）</span>
+      <span class="arch-item">hot.md（缓存）</span>
+      <span class="arch-item">log.md（日志）</span>
+      <span class="arch-item">overview.md（概览）</span>
+      <span class="arch-item">sources/（来源）</span>
+      <span class="arch-item">entities/（实体）</span>
+      <span class="arch-item">concepts/（概念）</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↕</div>
+  <div class="arch-row al-raw">
+    <div class="arch-label">Raw 层<br><small>不可变</small></div>
+    <div class="arch-content">
+      <span class="arch-item">.raw/articles/（文章）</span>
+      <span class="arch-item">.raw/transcripts/（转录）</span>
+      <span class="arch-item">.raw/screenshots/（截图）</span>
+      <span class="arch-item">.manifest.json（去重追踪）</span>
+    </div>
+  </div>
+  <div class="arch-arrow">↕</div>
+  <div class="arch-row al-obs">
+    <div class="arch-label">Obsidian 层<br><small>可视化</small></div>
+    <div class="arch-content">
+      <span class="arch-item">Graph View（图谱）</span>
+      <span class="arch-item">Canvas（画布）</span>
+      <span class="arch-item">Dataview（仪表盘）</span>
+      <span class="arch-item">Properties（元数据面板）</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<h3 style="text-align:center; margin-top:32px">Ingest 编译流程</h3>
+<div class="flow-h">
+  <span class="flow-box fb-yellow">📄 丢入素材</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-red">🔒 MD5 去重</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-blue">📖 完整阅读</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-green">✍️ 生成页面</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-purple">🔗 交叉引用</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-red">⚔️ 矛盾检测</span>
+</div>
+<p style="text-align:center; font-size:0.85em; color:#64748b; margin-top:8px">一个源文件触达 8-15 个 wiki 页面：1 source + N entities + N concepts + index + hot + log</p>
+</section>
+
+<!-- Section 4: Hooks -->
+<section id="hooks">
+<h2><span class="icon">🪝</span> Hook 自动化机制</h2>
+
+<p style="text-align:center; max-width:600px; margin:0 auto 20px; color:#94a3b8">
+  Hooks 是 claude-obsidian 的"隐形引擎"——它们在你不说话时自动工作，解决了 AI 的失忆问题。
+</p>
+
+<div class="hook-flow">
+  <div class="hook-card">
+    <div class="hk-name">SessionStart</div>
+    <div class="hk-desc">自动读取 <code>wiki/hot.md</code><br>→ 新 session 秒有上下文</div>
+    <div class="hk-arrow">🟢 每次启动</div>
+  </div>
+  <div class="hook-card">
+    <div class="hk-name">PostCompact</div>
+    <div class="hk-desc">上下文压缩后重新加载 hot.md<br>→ 长会话不丢失状态</div>
+    <div class="hk-arrow">🔄 自动恢复</div>
+  </div>
+  <div class="hook-card">
+    <div class="hk-name">PostToolUse</div>
+    <div class="hk-desc">每次文件写入后 <code>git add + commit</code><br>→ 版本可回溯</div>
+    <div class="hk-arrow">📝 每次写入</div>
+  </div>
+  <div class="hook-card">
+    <div class="hk-name">Stop</div>
+    <div class="hk-desc">Claude 回复结束时更新 hot.md<br>→ 下次 session 能续上</div>
+    <div class="hk-arrow">🛑 每次结束</div>
+  </div>
+</div>
+
+<div class="principle-box" style="margin-top:20px">
+<h4>Hot Cache 工作原理</h4>
+<div class="flow-h">
+  <span class="flow-box fb-red">Session 启动</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-blue">Hook: cat wiki/hot.md</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-green">~500 词上下文注入</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-purple">Claude 知道你最近在干什么</span>
+</div>
+<div class="desc" style="margin-top:12px; text-align:center">
+  解决痛点：<b>"每次新 session，AI 都是一张白纸"</b><br>
+  Hot Cache 让 AI 在 0.1 秒内恢复最近的工作上下文。
+</div>
+</div>
+</section>
+
+<!-- Section 5: Daily Use -->
+<section id="daily">
+<h2><span class="icon">📅</span> 日常使用指南</h2>
+
+<div class="wf-timeline">
+  <div class="wf-item">
+    <div class="wf-when">🌅 开始新 session</div>
+    <div class="wf-what">直接开始工作，SessionStart Hook 自动加载 hot.md</div>
+    <div class="wf-cmd">cd D:\code\personal-context && claude</div>
+  </div>
+  <div class="wf-item">
+    <div class="wf-when">📖 发现好文章/好网页</div>
+    <div class="wf-what">直接 ingest URL，Claude 自动抓取→清理→编译</div>
+    <div class="wf-cmd">ingest https://interesting-article.com/post</div>
+  </div>
+  <div class="wf-item">
+    <div class="wf-when">🤔 需要知识支持</div>
+    <div class="wf-what">从 wiki 里查，不是从训练数据查</div>
+    <div class="wf-cmd">what do you know about Flink exactly-once?</div>
+  </div>
+  <div class="wf-item">
+    <div class="wf-when">💡 对话产生了好洞察</div>
+    <div class="wf-what">一键存入 wiki，永不丢失</div>
+    <div class="wf-cmd">/save 这个关于 Agent 架构的分析</div>
+  </div>
+</div>
+
+<h3 style="margin-top:32px; text-align:center">周度/月度维护</h3>
+<div class="flow-h" style="margin-top:12px">
+  <span class="flow-box fb-blue">lint the wiki</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-green">修复问题</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-yellow">update hot cache</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box fb-purple">fold the log</span>
+</div>
+<p style="text-align:center; font-size:0.82em; color:#64748b; margin-top:8px">建议每 10-15 次 ingest 后跑一次 lint</p>
+</section>
+
+<!-- Section 6: Advanced -->
+<section id="advanced">
+<h2><span class="icon">🚀</span> 高级功能</h2>
+
+<div class="cap-grid">
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🌐</span><span class="cap-title">跨项目引用</span></div>
+    <div class="cap-body">在任何项目的 CLAUDE.md 中添加 wiki 路径指引。你的运维项目、代码项目、内容项目都能读取同一个知识库。</div>
+    <div class="cap-cmd">在其他项目 CLAUDE.md 里写 wiki 路径</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🐉</span><span class="cap-title">DragonScale Memory</span></div>
+    <div class="cap-body">可选扩展：日志折叠（extractive rollup）+ 确定性地址（c-NNNNNN）+ 语义去重（cosine tiling）+ 前沿研究选题。需要 python3 + 可选 ollama。</div>
+    <div class="cap-cmd">bash bin/setup-dragonscale.sh</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">🔀</span><span class="cap-title">多 Agent 并行写入</span></div>
+    <div class="cap-body">v1.7+ 支持多个 sub-agent 同时写 wiki。文件级 advisory lock 防冲突，PostToolUse hook 延迟提交直到锁释放。</div>
+    <div class="cap-cmd">bash bin/setup-multi-agent.sh</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">📊</span><span class="cap-title">Dataview 仪表盘</span></div>
+    <div class="cap-body">wiki/meta/dashboard.md 用 DQL 查询生成卡片网格。Obsidian Bases 原生数据库视图。自动按 status/type/domain 分组。</div>
+    <div class="cap-cmd">安装 Dataview 插件后自动生效</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">⚔️</span><span class="cap-title">矛盾标注</span></div>
+    <div class="cap-body">新旧信息冲突时，在两个页面都写入 [!contradiction] callout，包含对方链接和冲突内容。知识是演化的，矛盾是特性不是 bug。</div>
+    <div class="cap-cmd">ingest 时自动检测</div>
+  </div>
+  <div class="cap">
+    <div class="cap-head"><span class="cap-icon">📈</span><span class="cap-title">知识生命周期</span></div>
+    <div class="cap-body">每个页面有 status 字段：seed（萌芽）→ developing（发展）→ mature（成熟）→ evergreen（常青）。Lint 会提醒长期停留在 seed 的页面。</div>
+    <div class="cap-cmd">frontmatter: status: mature</div>
+  </div>
+</div>
+</section>
+
+</div>
+
+<footer>
+  claude-obsidian v1.9.2 · <a href="https://github.com/AgriciDaniel/claude-obsidian">GitHub</a> · 基于 Karpathy LLM Wiki 模式<br>
+  当前 vault: D:\code\personal-context · 289 wiki 页面 · 1,312 条互联
+</footer>
+
+</body>
+</html>

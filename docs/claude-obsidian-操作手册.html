@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>claude-obsidian 用户操作手册 — 什么自动/什么手动</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e8e8ed; line-height: 1.7; }
+.hero { background: linear-gradient(160deg, #0f172a, #1a1a2e); padding: 56px 40px; text-align: center; border-bottom: 1px solid #1e293b; }
+.hero h1 { font-size: 2.2em; font-weight: 800; color: #f1f5f9; }
+.hero .sub { color: #94a3b8; margin-top: 8px; font-size: 1em; }
+.container { max-width: 1000px; margin: 0 auto; padding: 40px 24px; }
+section { margin-bottom: 56px; }
+h2 { font-size: 1.5em; font-weight: 700; color: #f1f5f9; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+p { color: #94a3b8; margin-bottom: 12px; }
+code { background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; color: #34d399; }
+
+/* Auto/Manual indicator */
+.indicator { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.78em; font-weight: 700; }
+.auto { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+.manual { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.3); }
+.semi { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+
+/* Operation cards */
+.op-list { display: flex; flex-direction: column; gap: 12px; }
+.op-card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px 20px; display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 700px) { .op-card { grid-template-columns: 1fr; } }
+.op-left { display: flex; flex-direction: column; gap: 6px; }
+.op-name { font-weight: 700; color: #f1f5f9; font-size: 0.95em; }
+.op-trigger { font-size: 0.78em; color: #64748b; }
+.op-right { font-size: 0.88em; color: #cbd5e1; }
+.op-right .what { margin-bottom: 6px; }
+.op-right .when { font-size: 0.8em; color: #64748b; font-style: italic; }
+
+/* Summary table */
+.sum-table { width: 100%; border-collapse: collapse; font-size: 0.85em; margin: 16px 0; border-radius: 12px; overflow: hidden; }
+.sum-table th { background: #1e293b; padding: 10px 14px; text-align: left; color: #94a3b8; font-weight: 600; }
+.sum-table td { padding: 10px 14px; border-bottom: 1px solid rgba(30,41,59,0.6); color: #cbd5e1; }
+.sum-table tr:hover td { background: rgba(16,185,129,0.03); }
+
+/* Cheat sheet */
+.cheat { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid #334155; border-radius: 18px; padding: 28px; margin: 24px 0; }
+.cheat h3 { color: #f1f5f9; margin-bottom: 16px; text-align: center; font-size: 1.1em; }
+.cheat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.cheat-item { background: #0f172a; border: 1px solid #1e293b; border-radius: 10px; padding: 12px 14px; }
+.cheat-item .ci-freq { font-size: 0.72em; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.cheat-item .ci-cmd { font-family: monospace; font-size: 0.88em; color: #34d399; margin-bottom: 4px; }
+.cheat-item .ci-desc { font-size: 0.8em; color: #94a3b8; }
+
+/* Mindset box */
+.mindset { background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 14px; padding: 20px 24px; margin: 20px 0; }
+.mindset h4 { color: #34d399; margin-bottom: 8px; }
+.mindset p { color: #94a3b8; font-size: 0.9em; margin-bottom: 6px; }
+.mindset ul { margin-left: 16px; font-size: 0.88em; color: #cbd5e1; }
+.mindset li { margin-bottom: 4px; }
+
+footer { text-align: center; padding: 32px; color: #475569; font-size: 0.82em; border-top: 1px solid #1e293b; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>我需要做什么？什么是自动的？</h1>
+  <div class="sub">claude-obsidian 使用者视角 — 最小操作指南</div>
+</div>
+
+<div class="container">
+
+<!-- Mental Model -->
+<section>
+<h2>🧠 心智模型</h2>
+<div class="mindset">
+<h4>你只需要做三件事</h4>
+<ul>
+  <li><b>喂</b> — 把素材丢进 .raw/ 或直接给 URL</li>
+  <li><b>问</b> — 用自然语言提问题</li>
+  <li><b>偶尔维护</b> — 隔一段时间 lint 一下</li>
+</ul>
+<p style="margin-top:12px">其他所有事情（提取实体、建立链接、更新索引、管理上下文、git 提交）都是<b>自动的</b>。</p>
+</div>
+</section>
+
+<!-- Fully Automatic -->
+<section>
+<h2>🟢 完全自动（你不需要做任何事）</h2>
+<div class="op-list">
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">加载上下文</div>
+      <div class="op-trigger">SessionStart Hook</div>
+    </div>
+    <div class="op-right">
+      <div class="what">每次打开 Claude Code session，自动读取 <code>wiki/hot.md</code> 注入上下文。Claude 立即知道你最近在研究什么。</div>
+      <div class="when">每次启动 session 时自动触发，无需任何操作。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">上下文恢复</div>
+      <div class="op-trigger">PostCompact Hook</div>
+    </div>
+    <div class="op-right">
+      <div class="what">长会话中 Claude Code 压缩上下文后，自动重新加载 hot.md。不会因为对话太长而丢失 wiki 状态。</div>
+      <div class="when">Claude Code 自动 compact 时触发。你感知不到。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">Git 自动提交</div>
+      <div class="op-trigger">PostToolUse Hook</div>
+    </div>
+    <div class="op-right">
+      <div class="what">每次 Claude 写入或编辑文件后，自动 <code>git add wiki/ .raw/</code> 并提交。所有变更可回溯。</div>
+      <div class="when">每次文件操作后自动触发。你永远不需要手动 git commit wiki。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">更新 Hot Cache</div>
+      <div class="op-trigger">Stop Hook</div>
+    </div>
+    <div class="op-right">
+      <div class="what">Claude 每次回复结束时，自动把本次对话的关键变更写入 hot.md。下次 session 能续上。</div>
+      <div class="when">每次 Claude 回复后自动触发。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">去重检查</div>
+      <div class="op-trigger">ingest 时内部逻辑</div>
+    </div>
+    <div class="op-right">
+      <div class="what">ingest 时自动计算文件 MD5 对比 .manifest.json。相同文件不会重复编译（除非你说 "force ingest"）。</div>
+      <div class="when">每次 ingest 的第一步，自动执行。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">交叉引用</div>
+      <div class="op-trigger">ingest 时内部逻辑</div>
+    </div>
+    <div class="op-right">
+      <div class="what">ingest 时 Claude 自动在所有新页面中添加 [[wikilinks]]，链接到已有的实体和概念页面。</div>
+      <div class="when">ingest 过程中自动完成，不需要你指定"链接到哪"。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">矛盾标注</div>
+      <div class="op-trigger">ingest 时内部逻辑</div>
+    </div>
+    <div class="op-right">
+      <div class="what">新素材与已有知识冲突时，自动在两个相关页面添加 <code>[!contradiction]</code> callout 并互相链接。</div>
+      <div class="when">ingest 过程中如果检测到冲突，自动标注。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator auto">🟢 自动</span>
+      <div class="op-name">更新 index/log</div>
+      <div class="op-trigger">ingest 时内部逻辑</div>
+    </div>
+    <div class="op-right">
+      <div class="what">每次 ingest 自动更新 index.md（加新页面条目）和 log.md（追加操作记录）。</div>
+      <div class="when">ingest 的最后几步，自动执行。</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Manual Operations -->
+<section>
+<h2>🔵 需要你手动触发</h2>
+<div class="op-list">
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator manual">🔵 手动</span>
+      <div class="op-name">Ingest 素材</div>
+      <div class="op-trigger">你说一句话</div>
+    </div>
+    <div class="op-right">
+      <div class="what">告诉 Claude 要编译什么。可以是文件名、URL、或"把这些都 ingest"。</div>
+      <div class="when"><b>频率：每次发现好内容时</b><br>
+        <code>ingest 文件名.md</code><br>
+        <code>ingest https://good-article.com</code><br>
+        <code>ingest all of these</code>
+      </div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator manual">🔵 手动</span>
+      <div class="op-name">查询知识</div>
+      <div class="op-trigger">你提问</div>
+    </div>
+    <div class="op-right">
+      <div class="what">用自然语言问任何问题，Claude 从 wiki 里综合回答（不是从训练数据）。</div>
+      <div class="when"><b>频率：随时需要就问</b><br>
+        <code>what do you know about X?</code><br>
+        <code>query deep: 全面对比 A 和 B</code>
+      </div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator manual">🔵 手动</span>
+      <div class="op-name">保存对话精华</div>
+      <div class="op-trigger">你觉得值得留</div>
+    </div>
+    <div class="op-right">
+      <div class="what">当一次对话产生了有价值的洞察，一键存入 wiki 永久保留。</div>
+      <div class="when"><b>频率：觉得"这个分析不错"时</b><br>
+        <code>/save</code> 或 <code>/save 关于XX的分析</code>
+      </div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator manual">🔵 手动</span>
+      <div class="op-name">健康检查</div>
+      <div class="op-trigger">定期维护</div>
+    </div>
+    <div class="op-right">
+      <div class="what">让 Claude 检查 wiki 的健康状态：孤页、死链、缺失引用、矛盾等。生成修复建议。</div>
+      <div class="when"><b>频率：每 10-15 次 ingest 后，或每周一次</b><br>
+        <code>lint the wiki</code>
+      </div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator manual">🔵 手动</span>
+      <div class="op-name">深度研究</div>
+      <div class="op-trigger">你想深挖某个主题</div>
+    </div>
+    <div class="op-right">
+      <div class="what">Claude 自动执行多轮搜索→抓取→综合，结果直接写入 wiki。</div>
+      <div class="when"><b>频率：想深入一个新领域时</b><br>
+        <code>/autoresearch Agent 记忆系统设计</code>
+      </div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator manual">🔵 手动</span>
+      <div class="op-name">放文件到 .raw/</div>
+      <div class="op-trigger">你决定什么值得收</div>
+    </div>
+    <div class="op-right">
+      <div class="what">把值得编译的文件（文章、笔记、转录）放到 <code>.raw/articles/</code> 目录。这一步是"人类策展"。</div>
+      <div class="when"><b>频率：收集到好素材时</b>，直接复制文件到目录。然后 ingest。</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Semi-auto -->
+<section>
+<h2>🟡 半自动（你触发，但过程是自动的）</h2>
+<div class="op-list">
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator semi">🟡 半自动</span>
+      <div class="op-name">Lint 后的修复</div>
+      <div class="op-trigger">你确认后 Claude 执行</div>
+    </div>
+    <div class="op-right">
+      <div class="what">lint 发现问题后会问你"要不要自动修复？" 安全项（补 frontmatter、加链接）自动修，危险项（删页面、合并）需你同意。</div>
+      <div class="when">lint 之后，Claude 会展示结果并询问。</div>
+    </div>
+  </div>
+  <div class="op-card">
+    <div class="op-left">
+      <span class="indicator semi">🟡 半自动</span>
+      <div class="op-name">Ingest 时的讨论</div>
+      <div class="op-trigger">可选交互</div>
+    </div>
+    <div class="op-right">
+      <div class="what">ingest 一篇文章时 Claude 可能问"要强调什么？颗粒度多细？"。你可以回答细化方向，也可以说"just ingest it"跳过。</div>
+      <div class="when">单篇 ingest 时可能出现（批量模式自动跳过）。</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- You NEVER need to -->
+<section>
+<h2>🚫 你永远不需要做的事</h2>
+<div class="op-list">
+  <div class="op-card" style="border-color:#1e293b; opacity:0.7">
+    <div class="op-left"><div class="op-name" style="color:#64748b; text-decoration: line-through">手动写 frontmatter</div></div>
+    <div class="op-right"><div class="what" style="color:#475569">Claude 自动为每个页面生成完整的 YAML frontmatter（type/title/tags/status/related/sources）。</div></div>
+  </div>
+  <div class="op-card" style="border-color:#1e293b; opacity:0.7">
+    <div class="op-left"><div class="op-name" style="color:#64748b; text-decoration: line-through">手动加 [[wikilinks]]</div></div>
+    <div class="op-right"><div class="what" style="color:#475569">Claude 在 ingest 时自动识别并链接所有已知实体和概念。</div></div>
+  </div>
+  <div class="op-card" style="border-color:#1e293b; opacity:0.7">
+    <div class="op-left"><div class="op-name" style="color:#64748b; text-decoration: line-through">手动更新 index.md</div></div>
+    <div class="op-right"><div class="what" style="color:#475569">每次 ingest 自动更新索引。你不需要维护目录。</div></div>
+  </div>
+  <div class="op-card" style="border-color:#1e293b; opacity:0.7">
+    <div class="op-left"><div class="op-name" style="color:#64748b; text-decoration: line-through">手动 git commit</div></div>
+    <div class="op-right"><div class="what" style="color:#475569">PostToolUse hook 自动提交所有 wiki 变更。</div></div>
+  </div>
+  <div class="op-card" style="border-color:#1e293b; opacity:0.7">
+    <div class="op-left"><div class="op-name" style="color:#64748b; text-decoration: line-through">手动整理笔记结构</div></div>
+    <div class="op-right"><div class="what" style="color:#475569">Claude 自动决定页面放在 sources/ entities/ concepts/ 哪个目录。</div></div>
+  </div>
+  <div class="op-card" style="border-color:#1e293b; opacity:0.7">
+    <div class="op-left"><div class="op-name" style="color:#64748b; text-decoration: line-through">手动处理"上次聊到哪了"</div></div>
+    <div class="op-right"><div class="what" style="color:#475569">Hot Cache + SessionStart hook 自动恢复上下文。</div></div>
+  </div>
+</div>
+</section>
+
+<!-- Cheat Sheet -->
+<section>
+<div class="cheat">
+<h3>📋 操作速查卡</h3>
+<div class="cheat-grid">
+  <div class="cheat-item">
+    <div class="ci-freq">每天 · 高频</div>
+    <div class="ci-cmd">ingest https://url</div>
+    <div class="ci-desc">看到好文章，直接喂</div>
+  </div>
+  <div class="cheat-item">
+    <div class="ci-freq">每天 · 高频</div>
+    <div class="ci-cmd">what do you know about X?</div>
+    <div class="ci-desc">需要知识时，直接问</div>
+  </div>
+  <div class="cheat-item">
+    <div class="ci-freq">经常 · 中频</div>
+    <div class="ci-cmd">/save</div>
+    <div class="ci-desc">好对话，存下来</div>
+  </div>
+  <div class="cheat-item">
+    <div class="ci-freq">每周 · 低频</div>
+    <div class="ci-cmd">lint the wiki</div>
+    <div class="ci-desc">检查健康，修复问题</div>
+  </div>
+  <div class="cheat-item">
+    <div class="ci-freq">偶尔 · 按需</div>
+    <div class="ci-cmd">/autoresearch 主题</div>
+    <div class="ci-desc">深入研究新领域</div>
+  </div>
+  <div class="cheat-item">
+    <div class="ci-freq">偶尔 · 按需</div>
+    <div class="ci-cmd">ingest all of these</div>
+    <div class="ci-desc">批量处理 .raw/ 里的堆积</div>
+  </div>
+</div>
+</div>
+</section>
+
+<!-- Summary Table -->
+<section>
+<h2>📊 一图总览</h2>
+<table class="sum-table">
+<thead>
+<tr><th>操作</th><th>谁做</th><th>频率</th><th>你的动作</th></tr>
+</thead>
+<tbody>
+<tr><td>加载上下文</td><td><span class="indicator auto" style="font-size:0.7em">自动</span></td><td>每次开 session</td><td>无</td></tr>
+<tr><td>Git 提交</td><td><span class="indicator auto" style="font-size:0.7em">自动</span></td><td>每次文件变更</td><td>无</td></tr>
+<tr><td>交叉引用</td><td><span class="indicator auto" style="font-size:0.7em">自动</span></td><td>每次 ingest</td><td>无</td></tr>
+<tr><td>矛盾标注</td><td><span class="indicator auto" style="font-size:0.7em">自动</span></td><td>检测到冲突时</td><td>无</td></tr>
+<tr><td>更新 hot cache</td><td><span class="indicator auto" style="font-size:0.7em">自动</span></td><td>每次回复后</td><td>无</td></tr>
+<tr><td>去重跳过</td><td><span class="indicator auto" style="font-size:0.7em">自动</span></td><td>每次 ingest</td><td>无</td></tr>
+<tr style="background:rgba(99,102,241,0.03)"><td><b>Ingest 素材</b></td><td><span class="indicator manual" style="font-size:0.7em">手动</span></td><td>每天 1-5 次</td><td>说 <code>ingest xxx</code></td></tr>
+<tr style="background:rgba(99,102,241,0.03)"><td><b>查询知识</b></td><td><span class="indicator manual" style="font-size:0.7em">手动</span></td><td>随时</td><td>自然语言提问</td></tr>
+<tr style="background:rgba(99,102,241,0.03)"><td><b>保存对话</b></td><td><span class="indicator manual" style="font-size:0.7em">手动</span></td><td>有价值时</td><td>说 <code>/save</code></td></tr>
+<tr style="background:rgba(99,102,241,0.03)"><td><b>健康检查</b></td><td><span class="indicator manual" style="font-size:0.7em">手动</span></td><td>每周 1 次</td><td>说 <code>lint the wiki</code></td></tr>
+<tr style="background:rgba(99,102,241,0.03)"><td><b>深度研究</b></td><td><span class="indicator manual" style="font-size:0.7em">手动</span></td><td>按需</td><td>说 <code>/autoresearch 主题</code></td></tr>
+<tr style="background:rgba(245,158,11,0.03)"><td>Lint 修复</td><td><span class="indicator semi" style="font-size:0.7em">半自动</span></td><td>lint 后</td><td>确认"是否修复"</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- Mindset -->
+<section>
+<div class="mindset">
+<h4>💡 使用心态</h4>
+<p><b>把它当成一个认真做笔记的助手</b>，不是一个聊天机器人。</p>
+<ul>
+  <li>你负责<b>策展</b>（决定什么值得收进来）</li>
+  <li>AI 负责<b>编译</b>（提取、结构化、互联、标注）</li>
+  <li>你负责<b>提问</b>（利用积累的知识）</li>
+  <li>AI 负责<b>维护</b>（去重、检查健康、保持一致性）</li>
+</ul>
+<p style="margin-top:12px">知识库的价值 = <b>你喂了多少好东西</b> × <b>你问了多少好问题</b>。两者缺一不可。</p>
+</div>
+</section>
+
+</div>
+
+<footer>
+  claude-obsidian v1.9.2 · 用户操作手册<br>
+  你的 vault: D:\code\personal-context · 289 wiki 页面
+</footer>
+
+</body>
+</html>

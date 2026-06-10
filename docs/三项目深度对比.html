@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三大核心项目深度对比 — Stitch 调研</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0a0a0f; color: #e8e8ed; line-height: 1.7; }
+
+.hero { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 60px 40px; text-align: center; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 50%, rgba(234,179,8,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 30%, rgba(99,102,241,0.06) 0%, transparent 40%); }
+.hero h1 { font-size: 2.6em; font-weight: 800; background: linear-gradient(135deg, #fbbf24, #a78bfa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; }
+.hero .subtitle { font-size: 1.1em; color: #94a3b8; margin-top: 12px; position: relative; }
+
+.container { max-width: 1280px; margin: 0 auto; padding: 40px 24px; }
+section { margin-bottom: 64px; }
+h2 { font-size: 1.6em; font-weight: 700; color: #f1f5f9; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+h3 { font-size: 1.15em; font-weight: 600; color: #cbd5e1; margin: 16px 0 8px; }
+
+/* Three project hero cards */
+.project-heroes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 32px 0; }
+@media (max-width: 900px) { .project-heroes { grid-template-columns: 1fr; } }
+.phero { border-radius: 20px; padding: 28px; position: relative; overflow: hidden; transition: transform 0.2s; }
+.phero:hover { transform: translateY(-4px); }
+.phero-gbrain { background: linear-gradient(135deg, #1e293b, #1a1a2e); border: 2px solid #f59e0b; }
+.phero-nashsu { background: linear-gradient(135deg, #1e293b, #1a1a2e); border: 2px solid #6366f1; }
+.phero-claude { background: linear-gradient(135deg, #1e293b, #1a1a2e); border: 2px solid #10b981; }
+.phero .badge { position: absolute; top: 16px; right: 16px; padding: 4px 12px; border-radius: 12px; font-size: 0.8em; font-weight: 700; }
+.phero-gbrain .badge { background: rgba(245,158,11,0.2); color: #fbbf24; }
+.phero-nashsu .badge { background: rgba(99,102,241,0.2); color: #818cf8; }
+.phero-claude .badge { background: rgba(16,185,129,0.2); color: #34d399; }
+.phero h3 { color: #f1f5f9; font-size: 1.3em; margin: 0 0 4px; }
+.phero .author { color: #64748b; font-size: 0.85em; margin-bottom: 12px; }
+.phero .tagline { color: #cbd5e1; font-size: 0.95em; margin-bottom: 16px; min-height: 48px; }
+.phero .meta-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.phero .meta-item { font-size: 0.8em; color: #94a3b8; }
+.phero .meta-item b { color: #e2e8f0; }
+
+/* Comparison Table */
+.comp-table-wrap { overflow-x: auto; border-radius: 16px; border: 1px solid #334155; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88em; }
+th { background: #1e293b; padding: 12px 14px; text-align: left; color: #94a3b8; font-weight: 600; border-bottom: 1px solid #334155; position: sticky; top: 0; }
+td { padding: 10px 14px; border-bottom: 1px solid #1e293b; color: #cbd5e1; }
+tr:hover td { background: rgba(99,102,241,0.04); }
+td:first-child { color: #f1f5f9; font-weight: 500; white-space: nowrap; }
+.cell-best { color: #fbbf24; font-weight: 600; }
+.cell-good { color: #34d399; }
+.cell-mid { color: #94a3b8; }
+.cell-no { color: #475569; }
+
+/* Architecture Diagrams */
+.arch-section { display: grid; grid-template-columns: 1fr; gap: 32px; }
+.arch-box { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 24px; }
+.arch-box h4 { font-size: 1.05em; color: #f1f5f9; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.arch-box h4 .dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-gold { background: #f59e0b; }
+.dot-indigo { background: #6366f1; }
+.dot-green { background: #10b981; }
+
+.flow { display: flex; flex-direction: column; gap: 8px; }
+.flow-row { display: flex; align-items: center; gap: 8px; }
+.flow-box { padding: 8px 14px; border-radius: 8px; font-size: 0.82em; font-weight: 500; flex-shrink: 0; }
+.flow-arrow { color: #475569; font-size: 1.2em; }
+.flow-label { font-size: 0.75em; color: #64748b; margin-left: 8px; }
+
+.fb-gold { background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.25); }
+.fb-indigo { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); }
+.fb-green { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); }
+.fb-pink { background: rgba(236,72,153,0.12); color: #f9a8d4; border: 1px solid rgba(236,72,153,0.25); }
+.fb-cyan { background: rgba(6,182,212,0.12); color: #67e8f9; border: 1px solid rgba(6,182,212,0.25); }
+.fb-gray { background: rgba(107,114,128,0.12); color: #d1d5db; border: 1px solid rgba(107,114,128,0.25); }
+
+/* Feature deep-dive cards */
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+.feature-card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 20px; }
+.feature-card .fc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.feature-card .fc-icon { font-size: 1.4em; }
+.feature-card .fc-title { font-weight: 600; color: #f1f5f9; }
+.feature-card .fc-from { font-size: 0.75em; padding: 2px 8px; border-radius: 8px; margin-left: auto; }
+.fc-from-n { background: rgba(99,102,241,0.15); color: #818cf8; }
+.fc-from-c { background: rgba(16,185,129,0.15); color: #34d399; }
+.fc-from-g { background: rgba(245,158,11,0.15); color: #fbbf24; }
+.feature-card .fc-body { color: #94a3b8; font-size: 0.88em; }
+.feature-card .fc-body code { background: #0f172a; padding: 1px 5px; border-radius: 4px; font-size: 0.9em; color: #e2e8f0; }
+.feature-card ul { margin: 8px 0 0 16px; }
+.feature-card li { margin-bottom: 4px; }
+
+/* Verdict */
+.verdict { background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid #334155; border-radius: 20px; padding: 32px; margin-top: 40px; }
+.verdict h2 { margin-bottom: 16px; }
+.verdict-formula { font-size: 1.3em; text-align: center; padding: 20px; background: rgba(0,0,0,0.3); border-radius: 12px; margin: 16px 0; font-weight: 600; }
+.verdict-formula .vf-part { display: inline-block; margin: 4px 8px; padding: 6px 14px; border-radius: 8px; }
+.verdict-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 20px; }
+.verdict-item { padding: 16px; border-radius: 12px; }
+.verdict-item h4 { font-size: 0.9em; margin-bottom: 6px; }
+.verdict-item p { font-size: 0.85em; color: #94a3b8; }
+.vi-compile { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2); }
+.vi-compile h4 { color: #818cf8; }
+.vi-maintain { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); }
+.vi-maintain h4 { color: #34d399; }
+.vi-store { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+.vi-store h4 { color: #fbbf24; }
+
+footer { text-align: center; padding: 40px; color: #475569; font-size: 0.85em; border-top: 1px solid #1e293b; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>三大核心项目深度对比</h1>
+  <p class="subtitle">garrytan/gbrain · nashsu/llm_wiki · AgriciDaniel/claude-obsidian<br>为 Stitch 选择最佳组合方案</p>
+</div>
+
+<div class="container">
+
+<!-- Project Hero Cards -->
+<section>
+<div class="project-heroes">
+  <div class="phero phero-gbrain">
+    <span class="badge">⭐ 14,000</span>
+    <h3>garrytan/gbrain</h3>
+    <div class="author">Garry Tan · Y Combinator CEO</div>
+    <div class="tagline">有态度的 Agent 大脑。三层架构清晰分离：存储/检索/接口。</div>
+    <div class="meta-row">
+      <span class="meta-item"><b>MIT</b> 协议</span>
+      <span class="meta-item"><b>Postgres</b> 混合检索</span>
+      <span class="meta-item"><b>MCP</b> Server</span>
+      <span class="meta-item"><b>Git</b> 版本化</span>
+    </div>
+  </div>
+  <div class="phero phero-nashsu">
+    <span class="badge">⭐ 10,234</span>
+    <h3>nashsu/llm_wiki</h3>
+    <div class="author">nashsu · 两个月发 37 个版本</div>
+    <div class="tagline">知识编译桌面应用。两步链式思考 + 四信号图谱 + 主动研究。</div>
+    <div class="meta-row">
+      <span class="meta-item"><b>Tauri v2</b> 桌面</span>
+      <span class="meta-item"><b>React 19</b></span>
+      <span class="meta-item"><b>6 家 LLM</b></span>
+      <span class="meta-item"><b>GPL-3.0</b></span>
+    </div>
+  </div>
+  <div class="phero phero-claude">
+    <span class="badge">⭐ 5,966</span>
+    <h3>claude-obsidian</h3>
+    <div class="author">Daniel Agrici · v1.9.2</div>
+    <div class="tagline">自组织第二大脑。15 个 Skill + Hot Cache + 10 类 Lint 健康检查。</div>
+    <div class="meta-row">
+      <span class="meta-item"><b>MIT</b> 协议</span>
+      <span class="meta-item"><b>15</b> Skills</span>
+      <span class="meta-item"><b>Claude Code</b> 插件</span>
+      <span class="meta-item"><b>Obsidian</b> 深度集成</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- Comparison Table -->
+<section>
+<h2>📊 能力矩阵对比</h2>
+<div class="comp-table-wrap">
+<table>
+<thead>
+<tr><th>能力维度</th><th style="color:#fbbf24">gbrain</th><th style="color:#818cf8">nashsu/llm_wiki</th><th style="color:#34d399">claude-obsidian</th></tr>
+</thead>
+<tbody>
+<tr><td>Ingest 编译质量</td><td class="cell-mid">基础编译</td><td class="cell-best">⭐ 两步链式思考</td><td class="cell-good">8-15 页联动</td></tr>
+<tr><td>知识图谱</td><td class="cell-good">Postgres 图存储</td><td class="cell-best">⭐ 四信号 + Louvain 社区</td><td class="cell-good">Wikilinks + Canvas</td></tr>
+<tr><td>检索能力</td><td class="cell-best">⭐ Postgres BM25+向量</td><td class="cell-good">BM25 + LanceDB 向量</td><td class="cell-good">BM25 + 余弦重排序</td></tr>
+<tr><td>主动研究</td><td class="cell-no">无</td><td class="cell-best">⭐ Deep Research（多引擎）</td><td class="cell-good">autoresearch（3 轮）</td></tr>
+<tr><td>Obsidian 集成</td><td class="cell-no">不支持</td><td class="cell-good">兼容（自动生成 .obsidian/）</td><td class="cell-best">⭐ 深度集成（CLI+Canvas+模式）</td></tr>
+<tr><td>可视化</td><td class="cell-no">无</td><td class="cell-best">⭐ sigma.js 图谱可视化</td><td class="cell-good">JSON Canvas 画布</td></tr>
+<tr><td>方法论支持</td><td class="cell-no">无</td><td class="cell-mid">场景模板</td><td class="cell-best">⭐ LYT/PARA/Zettelkasten/通用</td></tr>
+<tr><td>Session 上下文</td><td class="cell-no">无</td><td class="cell-good">purpose.md</td><td class="cell-best">⭐ Hot Cache（500词秒加载）</td></tr>
+<tr><td>矛盾处理</td><td class="cell-no">无</td><td class="cell-mid">标记</td><td class="cell-best">⭐ [!contradiction] 双向 callout</td></tr>
+<tr><td>Lint 健康检查</td><td class="cell-mid">有限（dead links）</td><td class="cell-good">有</td><td class="cell-best">⭐ 10 类检查 + 语义去重</td></tr>
+<tr><td>隐私控制</td><td class="cell-mid">一般</td><td class="cell-good">本地优先</td><td class="cell-best">⭐ 明确同意门</td></tr>
+<tr><td>Git 集成</td><td class="cell-best">⭐ 核心设计</td><td class="cell-no">无</td><td class="cell-good">PostToolUse 自动提交</td></tr>
+<tr><td>MCP Server</td><td class="cell-good">✓</td><td class="cell-good">✓（v0.4.17 新增）</td><td class="cell-mid">可选</td></tr>
+<tr><td>多 LLM 支持</td><td class="cell-mid">OpenClaw 绑定</td><td class="cell-best">⭐ 6 家（含 Ollama 本地）</td><td class="cell-good">Claude 优先 + 实验性多模型</td></tr>
+<tr><td>Chrome 剪藏</td><td class="cell-no">无</td><td class="cell-best">⭐ Web Clipper 扩展</td><td class="cell-no">无（用 defuddle）</td></tr>
+<tr><td>增量缓存</td><td class="cell-no">无</td><td class="cell-best">⭐ SHA256 哈希跳过</td><td class="cell-no">无</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- Architecture Diagrams -->
+<section>
+<h2>🏗️ 架构对比图</h2>
+<div class="arch-section">
+
+<div class="arch-box">
+<h4><span class="dot dot-gold"></span> gbrain — 三层分离架构</h4>
+<div class="flow">
+  <div class="flow-row">
+    <span class="flow-box fb-gold">Markdown 文件</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box fb-gold">Git Repo</span>
+    <span class="flow-label">Brain Repo 层（存储）</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-gold">BM25 全文</span>
+    <span class="flow-box fb-gold">向量嵌入</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box fb-gold">Postgres</span>
+    <span class="flow-label">Retrieval 层（检索）</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-gold">MCP Server</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box fb-gray">OpenClaw / Hermes Agent</span>
+    <span class="flow-label">Server 层（接口）</span>
+  </div>
+</div>
+</div>
+
+<div class="arch-box">
+<h4><span class="dot dot-indigo"></span> nashsu/llm_wiki — 编译引擎架构</h4>
+<div class="flow">
+  <div class="flow-row">
+    <span class="flow-box fb-indigo">PDF/DOCX/URL/剪藏</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box fb-indigo">raw/sources/</span>
+    <span class="flow-label">输入层</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+    <span class="flow-label" style="color:#818cf8">SHA256 去重</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-indigo">Step 1: 分析</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box fb-indigo">Step 2: 生成</span>
+    <span class="flow-label">两步编译</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-indigo">entities/</span>
+    <span class="flow-box fb-indigo">concepts/</span>
+    <span class="flow-box fb-indigo">synthesis/</span>
+    <span class="flow-box fb-indigo">index.md</span>
+    <span class="flow-label">Wiki 层</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-pink">四信号图谱</span>
+    <span class="flow-box fb-pink">Louvain 社区</span>
+    <span class="flow-box fb-cyan">Deep Research</span>
+    <span class="flow-label">智能层</span>
+  </div>
+</div>
+</div>
+
+<div class="arch-box">
+<h4><span class="dot dot-green"></span> claude-obsidian — 自组织 Skill 架构</h4>
+<div class="flow">
+  <div class="flow-row">
+    <span class="flow-box fb-green">.raw/ 素材</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-box fb-green">wiki-ingest Skill</span>
+    <span class="flow-label">输入</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+    <span class="flow-label" style="color:#34d399">触达 8-15 个页面</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-green">sources/</span>
+    <span class="flow-box fb-green">entities/</span>
+    <span class="flow-box fb-green">concepts/</span>
+    <span class="flow-box fb-green">hot.md</span>
+    <span class="flow-box fb-green">index.md</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-pink">wiki-lint（10类检查）</span>
+    <span class="flow-box fb-pink">wiki-retrieve（混合检索）</span>
+    <span class="flow-box fb-cyan">autoresearch</span>
+  </div>
+  <div class="flow-row" style="margin-left:40px">
+    <span class="flow-arrow">↓</span>
+  </div>
+  <div class="flow-row">
+    <span class="flow-box fb-green">Hooks</span>
+    <span class="flow-label">SessionStart（加载 hot.md）→ Stop（更新缓存）→ PostToolUse（自动提交）</span>
+  </div>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- Feature Deep Dive -->
+<section>
+<h2>🔬 关键机制详解</h2>
+<div class="feature-grid">
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">🧬</span>
+    <span class="fc-title">两步链式思考 Ingest</span>
+    <span class="fc-from fc-from-n">nashsu</span>
+  </div>
+  <div class="fc-body">
+    不是一步到位让 LLM 直接写 wiki，而是分两步：
+    <ul>
+      <li><b>Step 1 分析</b>：提取实体、概念、论点、与现有 wiki 的关联、矛盾点</li>
+      <li><b>Step 2 生成</b>：基于分析结果写摘要页、实体页、概念页、更新索引</li>
+    </ul>
+    类比：先列提纲再写文章，质量远超直接写。
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">🔥</span>
+    <span class="fc-title">Hot Cache 机制</span>
+    <span class="fc-from fc-from-c">claude-obsidian</span>
+  </div>
+  <div class="fc-body">
+    <code>wiki/hot.md</code> 是约 500 词的近期上下文缓存，通过 Hook 体系实现：
+    <ul>
+      <li><b>SessionStart</b>：自动读取 hot.md → 新 session 秒有上下文</li>
+      <li><b>Stop</b>：检测 wiki 变更 → 提示更新 hot cache</li>
+    </ul>
+    解决了"AI 每次醒来都是失忆状态"的痛点。
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">📊</span>
+    <span class="fc-title">四信号知识图谱</span>
+    <span class="fc-from fc-from-n">nashsu</span>
+  </div>
+  <div class="fc-body">
+    不靠 LLM 自由发挥连线，而是用四个可量化信号评分：
+    <ul>
+      <li><b>直接链接</b> ×3.0 — [[wikilinks]] 互联</li>
+      <li><b>来源重叠</b> ×4.0 — 共享相同原始素材（权重最高）</li>
+      <li><b>Adamic-Adar</b> ×1.5 — 共同邻居加权</li>
+      <li><b>类型亲和</b> ×1.0 — 同类型页面加分</li>
+    </ul>
+    再用 Louvain 算法自动检测知识社区/聚类。
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">🏥</span>
+    <span class="fc-title">10 类 Lint 健康检查</span>
+    <span class="fc-from fc-from-c">claude-obsidian</span>
+  </div>
+  <div class="fc-body">
+    最完整的知识库健康维护体系：
+    <ul>
+      <li>孤立页面 · 死链接 · 陈旧声明</li>
+      <li>缺失页面 · 缺失交叉引用</li>
+      <li>frontmatter 缺失 · 空白章节</li>
+      <li>陈旧索引条目 · 地址验证</li>
+      <li><b>语义去重</b>（用 embedding 检测重复内容）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">🔍</span>
+    <span class="fc-title">Deep Research 主动研究</span>
+    <span class="fc-from fc-from-n">nashsu</span>
+  </div>
+  <div class="fc-body">
+    不只消化已有素材，还主动上网填补知识空白：
+    <ul>
+      <li>LLM 读 overview + purpose → 生成研究主题和搜索词</li>
+      <li>用户确认后，通过 Tavily/SerpApi/SearXNG 搜索</li>
+      <li>LLM 综合结果写入研究页</li>
+      <li>研究结果自动 ingest → 提取新的实体/概念</li>
+    </ul>
+    也能从图谱洞察触发：孤立节点、稀疏社区、桥接节点。
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">⚡</span>
+    <span class="fc-title">三层分离 + Git 版本化</span>
+    <span class="fc-from fc-from-g">gbrain</span>
+  </div>
+  <div class="fc-body">
+    架构设计最清晰的一个：
+    <ul>
+      <li><b>Brain Repo</b>：纯 Markdown 文件 + Git 管理 = 可回溯</li>
+      <li><b>Retrieval</b>：Postgres 做混合检索（应对大规模）</li>
+      <li><b>MCP Server</b>：标准接口，Agent 可读/写/推理</li>
+    </ul>
+    <code>gbrain features --auto-fix</code> 自动诊断并修复问题。
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">⚔️</span>
+    <span class="fc-title">矛盾双向标注</span>
+    <span class="fc-from fc-from-c">claude-obsidian</span>
+  </div>
+  <div class="fc-body">
+    新素材与已有知识冲突时，不是静默覆盖：
+    <ul>
+      <li>在<b>两个</b>冲突页面都添加 <code>[!contradiction]</code> callout</li>
+      <li>callout 内包含对方页面的链接和冲突内容</li>
+      <li>人类可以后续裁决哪个正确</li>
+    </ul>
+    其他项目最多只是标记，不做双向关联。
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="fc-header">
+    <span class="fc-icon">🎯</span>
+    <span class="fc-title">purpose.md — Wiki 的灵魂</span>
+    <span class="fc-from fc-from-n">nashsu</span>
+  </div>
+  <div class="fc-body">
+    每个 Wiki 项目都有一个 <code>purpose.md</code>：
+    <ul>
+      <li>定义目标：这个知识库是用来做什么的</li>
+      <li>关键问题：我最想回答的 3-5 个问题</li>
+      <li>研究范围：什么该收、什么不收</li>
+      <li>演进论点：我目前的核心观点（允许随证据变化）</li>
+    </ul>
+    LLM 在每次 ingest 和 query 时都读取，保证行为一致。
+  </div>
+</div>
+
+</div>
+</section>
+
+<!-- Verdict -->
+<div class="verdict">
+<h2>🎯 对 Stitch 的最终建议</h2>
+<div class="verdict-formula">
+  <span class="vf-part" style="background:rgba(99,102,241,0.15); color:#a5b4fc">nashsu 的编译引擎</span>
+  <span style="color:#475569">+</span>
+  <span class="vf-part" style="background:rgba(16,185,129,0.15); color:#6ee7b7">claude-obsidian 的维护机制</span>
+  <span style="color:#475569">+</span>
+  <span class="vf-part" style="background:rgba(245,158,11,0.15); color:#fcd34d">gbrain 的存储理念</span>
+</div>
+
+<div class="verdict-items">
+  <div class="verdict-item vi-compile">
+    <h4>📥 编译核心 ← nashsu</h4>
+    <p>两步链式思考 Ingest · SHA256 增量缓存 · 四信号图谱评分 · Deep Research 主动填补 · purpose.md 目标约束 · Chrome Web Clipper · 上下文预算控制（60/20/5/15）</p>
+  </div>
+  <div class="verdict-item vi-maintain">
+    <h4>🔧 维护体系 ← claude-obsidian</h4>
+    <p>Hot Cache 秒加载上下文 · 10 类 Lint 健康检查 · [!contradiction] 矛盾双向标注 · LYT/PARA/ZK 方法论切换 · 15 Skill 模块化 · Hook 四钩子 · Auto-commit</p>
+  </div>
+  <div class="verdict-item vi-store">
+    <h4>💾 存储与检索 ← gbrain</h4>
+    <p>Git-versioned Markdown · 三层分离（Repo/Retrieval/Server） · 规模大时升级 Postgres 混合检索 · MCP 标准接口 · gbrain features 自诊断</p>
+  </div>
+</div>
+</div>
+
+</div>
+
+<footer>
+  Stitch 项目深度调研 · 2026年6月3日<br>
+  数据来源：GitHub 仓库 README · 社区评测 · 源码分析
+</footer>
+
+</body>
+</html>

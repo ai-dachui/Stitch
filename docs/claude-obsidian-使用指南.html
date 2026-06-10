@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>claude-obsidian 使用指南</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0f0f14; color: #e8e8ed; line-height: 1.7; }
+.hero { background: linear-gradient(160deg, #1a1a2e, #16213e, #0f3460); padding: 64px 40px; text-align: center; border-bottom: 1px solid #1e293b; }
+.hero h1 { font-size: 2.8em; font-weight: 800; background: linear-gradient(135deg, #10b981, #34d399, #6ee7b7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero .sub { color: #94a3b8; margin-top: 12px; font-size: 1.1em; }
+.hero .version { color: #475569; margin-top: 8px; font-size: 0.85em; }
+.container { max-width: 1100px; margin: 0 auto; padding: 48px 24px; }
+section { margin-bottom: 64px; }
+h2 { font-size: 1.6em; font-weight: 700; color: #f1f5f9; margin-bottom: 20px; padding-left: 16px; border-left: 4px solid #10b981; }
+h3 { font-size: 1.1em; font-weight: 600; color: #cbd5e1; margin: 20px 0 8px; }
+p { color: #94a3b8; margin-bottom: 12px; }
+a { color: #34d399; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Concept diagram */
+.concept-box { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #334155; border-radius: 20px; padding: 32px; margin: 24px 0; text-align: center; }
+.concept-box .cb-title { font-size: 1.2em; font-weight: 700; color: #34d399; margin-bottom: 16px; }
+.concept-flow { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+.cf-box { padding: 10px 18px; border-radius: 10px; font-size: 0.88em; font-weight: 600; }
+.cf-input { background: rgba(16,185,129,0.12); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+.cf-process { background: rgba(99,102,241,0.12); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+.cf-output { background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.3); }
+.cf-arrow { color: #475569; font-size: 1.4em; }
+
+/* Command cards */
+.cmd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.cmd-card { background: #1e293b; border: 1px solid #334155; border-radius: 14px; padding: 18px; transition: all 0.2s; }
+.cmd-card:hover { border-color: #10b981; transform: translateY(-2px); }
+.cmd-card .cmd { font-family: 'JetBrains Mono', monospace; font-size: 0.92em; color: #34d399; font-weight: 600; margin-bottom: 6px; }
+.cmd-card .desc { font-size: 0.85em; color: #94a3b8; }
+.cmd-card .effect { font-size: 0.8em; color: #64748b; margin-top: 6px; font-style: italic; }
+
+/* Workflow diagrams */
+.workflow { background: #1e293b; border-radius: 16px; padding: 24px; border: 1px solid #334155; margin: 16px 0; }
+.wf-title { font-weight: 700; color: #f1f5f9; margin-bottom: 16px; font-size: 1em; }
+.wf-steps { display: flex; flex-direction: column; gap: 10px; }
+.wf-step { display: flex; align-items: flex-start; gap: 12px; }
+.wf-num { min-width: 28px; height: 28px; background: rgba(16,185,129,0.15); color: #34d399; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700; flex-shrink: 0; }
+.wf-content { flex: 1; }
+.wf-content b { color: #f1f5f9; }
+.wf-content { font-size: 0.88em; color: #cbd5e1; }
+.wf-note { background: rgba(99,102,241,0.06); border-left: 3px solid #6366f1; padding: 8px 12px; margin-top: 8px; font-size: 0.82em; color: #94a3b8; border-radius: 0 8px 8px 0; }
+
+/* Vault structure */
+.tree { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.82em; color: #94a3b8; white-space: pre; overflow-x: auto; line-height: 1.9; }
+.tree .folder { color: #fbbf24; }
+.tree .file { color: #60a5fa; }
+.tree .new { color: #34d399; }
+.tree .comment { color: #475569; }
+
+/* Tips */
+.tip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.tip { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 16px; }
+.tip .emoji { font-size: 1.5em; margin-bottom: 8px; }
+.tip .title { font-weight: 600; color: #f1f5f9; font-size: 0.9em; margin-bottom: 4px; }
+.tip .body { font-size: 0.82em; color: #94a3b8; }
+
+/* Schema example */
+.schema { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 16px; font-family: monospace; font-size: 0.82em; color: #94a3b8; overflow-x: auto; white-space: pre; margin: 12px 0; }
+.schema .k { color: #60a5fa; }
+.schema .v { color: #fbbf24; }
+.schema .c { color: #475569; }
+
+/* Badge */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 8px; font-size: 0.75em; font-weight: 600; }
+.b-green { background: rgba(16,185,129,0.15); color: #34d399; }
+.b-blue { background: rgba(99,102,241,0.15); color: #818cf8; }
+.b-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; }
+
+footer { text-align: center; padding: 32px; color: #475569; font-size: 0.82em; border-top: 1px solid #1e293b; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>claude-obsidian 使用指南</h1>
+  <div class="sub">自组织 AI 第二大脑 — 让知识像复利一样积累</div>
+  <div class="version">v1.9.2 · MIT 协议 · 基于 Karpathy LLM Wiki 模式</div>
+</div>
+
+<div class="container">
+
+<!-- Core Concept -->
+<section>
+<h2>核心理念</h2>
+
+<div class="concept-box">
+<div class="cb-title">"Wiki 是产品，Chat 只是接口。知识像复利一样积累。"</div>
+<div class="concept-flow">
+  <span class="cf-box cf-input">📄 丢入素材</span>
+  <span class="cf-arrow">→</span>
+  <span class="cf-box cf-process">🧠 Claude 编译</span>
+  <span class="cf-arrow">→</span>
+  <span class="cf-box cf-output">📚 8-15 个互联页面</span>
+</div>
+<p style="color:#64748b; font-size:0.85em; margin-top:12px">每个新素材让整个 Wiki 更聪明。跨主题的关联自动发现。知识不是存了就完，而是持续编译、交叉引用、标记矛盾。</p>
+</div>
+
+<p>claude-obsidian 不是一个"AI 聊天插件"。它是一个 <b>Claude Code 插件 + Obsidian 知识库</b>，让 AI 自动组织、维护、演化你的知识。你只需要丢素材和提问题。</p>
+
+<div class="concept-flow" style="margin-top:20px">
+  <span class="cf-box cf-input">传统 RAG</span>
+  <span style="color:#ef4444; padding:0 8px;">✕ 每次查询从零检索</span>
+</div>
+<div class="concept-flow">
+  <span class="cf-box cf-output">LLM Wiki</span>
+  <span style="color:#34d399; padding:0 8px;">✓ 知识编译一次，持续维护，复利增长</span>
+</div>
+</section>
+
+<!-- Installation -->
+<section>
+<h2>安装（2 分钟）</h2>
+
+<div class="workflow">
+<div class="wf-title">方式一：从 Claude Code 安装插件（推荐）</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">1</div><div class="wf-content"><b>添加市场源</b><br><code>claude plugin marketplace add AgriciDaniel/claude-obsidian</code></div></div>
+  <div class="wf-step"><div class="wf-num">2</div><div class="wf-content"><b>安装插件</b><br><code>claude plugin install claude-obsidian@agricidaniel-claude-obsidian</code></div></div>
+  <div class="wf-step"><div class="wf-num">3</div><div class="wf-content"><b>进入你的 vault 目录，启动 Claude Code</b><br><code>cd ~/my-vault && claude</code></div></div>
+  <div class="wf-step"><div class="wf-num">4</div><div class="wf-content"><b>输入 <code>/wiki</code></b> — Claude 自动检测环境并引导 scaffold</div></div>
+</div>
+</div>
+
+<div class="workflow">
+<div class="wf-title">方式二：克隆为全新 Vault</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">1</div><div class="wf-content"><code>git clone https://github.com/AgriciDaniel/claude-obsidian</code></div></div>
+  <div class="wf-step"><div class="wf-num">2</div><div class="wf-content"><code>cd claude-obsidian && bash bin/setup-vault.sh</code></div></div>
+  <div class="wf-step"><div class="wf-num">3</div><div class="wf-content">Obsidian → 管理 Vaults → 打开文件夹 → 选择 <code>claude-obsidian/</code></div></div>
+</div>
+</div>
+</section>
+
+<!-- Vault Structure -->
+<section>
+<h2>知识库目录结构</h2>
+
+<div class="tree"><span class="folder">my-vault/</span>
+├── <span class="new">purpose.md</span>              <span class="comment"># Wiki 的灵魂：目标、关键问题、研究范围</span>
+├── <span class="new">WIKI.md</span>                 <span class="comment"># Schema 参考文档</span>
+├── <span class="folder">.raw/</span>                    <span class="comment"># 素材输入区（不可变）</span>
+│   ├── <span class="folder">articles/</span>            <span class="comment"># 文章、网页剪藏</span>
+│   ├── <span class="folder">transcripts/</span>         <span class="comment"># 视频/音频转录</span>
+│   ├── <span class="folder">screenshots/</span>         <span class="comment"># 截图、图片</span>
+│   └── <span class="file">.manifest.json</span>       <span class="comment"># 去重追踪（自动维护）</span>
+├── <span class="folder">wiki/</span>                    <span class="comment"># LLM 编译层（Claude 全权维护）</span>
+│   ├── <span class="file">index.md</span>             <span class="comment"># 知识总目录</span>
+│   ├── <span class="file">hot.md</span>               <span class="comment"># 近期上下文缓存（每 session 自动加载）</span>
+│   ├── <span class="file">log.md</span>               <span class="comment"># 操作日志（只追加）</span>
+│   ├── <span class="file">overview.md</span>          <span class="comment"># 全局概览（自动更新）</span>
+│   ├── <span class="folder">entities/</span>            <span class="comment"># 人物、组织、产品、仓库</span>
+│   ├── <span class="folder">concepts/</span>            <span class="comment"># 理论、方法、框架</span>
+│   ├── <span class="folder">sources/</span>             <span class="comment"># 来源摘要</span>
+│   ├── <span class="folder">comparisons/</span>         <span class="comment"># 对比分析</span>
+│   ├── <span class="folder">questions/</span>           <span class="comment"># 问答存档</span>
+│   └── <span class="folder">meta/</span>                <span class="comment"># lint 报告、dashboard</span>
+└── <span class="folder">.vault-meta/</span>             <span class="comment"># 运行配置</span>
+    ├── <span class="file">transport.json</span>       <span class="comment"># 通信方式（CLI/MCP/文件系统）</span>
+    └── <span class="file">mode.json</span>            <span class="comment"># 方法论模式</span></div>
+</section>
+
+<!-- Commands -->
+<section>
+<h2>命令速查</h2>
+<p>在 Claude Code session 中直接输入即可触发对应 Skill：</p>
+
+<h3>📥 内容输入</h3>
+<div class="cmd-grid">
+  <div class="cmd-card">
+    <div class="cmd">ingest 文件名.md</div>
+    <div class="desc">读取 .raw/ 中的文件，编译为 wiki 页面</div>
+    <div class="effect">→ 创建 8-15 个互联页面，更新 index/hot/log</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">ingest all of these</div>
+    <div class="desc">批量处理 .raw/ 中所有未 ingest 的文件</div>
+    <div class="effect">→ 逐个编译 + 最后做交叉引用扫描</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">ingest https://example.com/article</div>
+    <div class="desc">抓取网页 → 清理 → 保存到 .raw/ → 编译</div>
+    <div class="effect">→ 用 defuddle 去广告，保存后自动 ingest</div>
+  </div>
+</div>
+
+<h3>🔍 查询知识</h3>
+<div class="cmd-grid">
+  <div class="cmd-card">
+    <div class="cmd">what do you know about X?</div>
+    <div class="desc">标准查询：hot.md → index → 3-5 个相关页面 → 综合</div>
+    <div class="effect">→ 带引用的综合回答（不是训练数据，是 wiki 内容）</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">query quick: X 是什么？</div>
+    <div class="desc">快速模式：只读 hot.md（~1,500 token）</div>
+    <div class="effect">→ 秒回，适合简单事实查询</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">query deep: 全面对比 A 和 B</div>
+    <div class="desc">深度模式：读所有相关页面 + 可选网络搜索</div>
+    <div class="effect">→ 8,000+ token 综合分析，结果存回 wiki</div>
+  </div>
+</div>
+
+<h3>🔧 维护管理</h3>
+<div class="cmd-grid">
+  <div class="cmd-card">
+    <div class="cmd">lint the wiki</div>
+    <div class="desc">10 类健康检查：孤页、死链、矛盾、缺失引用…</div>
+    <div class="effect">→ 生成 wiki/meta/lint-report-日期.md</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">update hot cache</div>
+    <div class="desc">刷新 hot.md 近期上下文缓存</div>
+    <div class="effect">→ 下次 session 开始时自动加载最新状态</div>
+  </div>
+</div>
+
+<h3>💡 高级功能</h3>
+<div class="cmd-grid">
+  <div class="cmd-card">
+    <div class="cmd">/save</div>
+    <div class="desc">把当前对话的精华存为 wiki 笔记</div>
+    <div class="effect">→ 自动归类、加 frontmatter、更新 index</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">/autoresearch 主题</div>
+    <div class="desc">自主研究循环：搜索 → 抓取 → 综合 → 存入 wiki</div>
+    <div class="effect">→ 多轮迭代，直到达到研究深度</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">/canvas</div>
+    <div class="desc">可视化画布：添加图片/文本/PDF/wiki 页面</div>
+    <div class="effect">→ 生成 Obsidian Canvas JSON 文件</div>
+  </div>
+  <div class="cmd-card">
+    <div class="cmd">/think 问题描述</div>
+    <div class="desc">10 原则结构化思考：观察→倾听→分析→连接→创造</div>
+    <div class="effect">→ 深度思考框架，适合架构决策和复杂问题</div>
+  </div>
+</div>
+</section>
+
+<!-- Ingest Workflow Detail -->
+<section>
+<h2>Ingest 编译流程详解</h2>
+
+<div class="workflow">
+<div class="wf-title">一篇文章被 ingest 后发生什么？（触达 8-15 个页面）</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">1</div><div class="wf-content"><b>去重检查</b> — 计算文件 MD5，比对 .manifest.json。重复则跳过（除非 force）</div></div>
+  <div class="wf-step"><div class="wf-num">2</div><div class="wf-content"><b>完整阅读</b> — "Do not skim." 全文读取，不跳过</div></div>
+  <div class="wf-step"><div class="wf-num">3</div><div class="wf-content"><b>讨论</b>（可选）— "强调什么？颗粒度？" 用户可跳过</div></div>
+  <div class="wf-step"><div class="wf-num">4</div><div class="wf-content"><b>创建来源摘要页</b> → <code>wiki/sources/文章标题.md</code></div></div>
+  <div class="wf-step"><div class="wf-num">5</div><div class="wf-content"><b>创建/更新实体页</b> — 每个人物、组织、产品单独一页</div></div>
+  <div class="wf-step"><div class="wf-num">6</div><div class="wf-content"><b>创建/更新概念页</b> — 重要想法、框架、方法论</div></div>
+  <div class="wf-step"><div class="wf-num">7</div><div class="wf-content"><b>更新 overview.md</b> — 如果大局有变</div></div>
+  <div class="wf-step"><div class="wf-num">8</div><div class="wf-content"><b>更新 index.md + hot.md + log.md</b></div></div>
+  <div class="wf-step"><div class="wf-num">9</div><div class="wf-content"><b>矛盾检查</b> — 如果与现有知识冲突，在两个页面都标注 <code>[!contradiction]</code></div></div>
+  <div class="wf-step"><div class="wf-num">10</div><div class="wf-content"><b>交叉引用</b> — 所有提到的实体/概念添加 [[wikilinks]]</div></div>
+</div>
+<div class="wf-note">💡 每次 ingest 后 .manifest.json 自动更新，记录哪些页面被创建/更新。下次遇到相同文件自动跳过。</div>
+</div>
+</section>
+
+<!-- Page Schema -->
+<section>
+<h2>页面类型与 Frontmatter</h2>
+
+<p>每个 wiki 页面都有 YAML frontmatter，Obsidian Properties 面板可直接编辑：</p>
+
+<div class="schema"><span class="c"># 实体页示例 (wiki/entities/Andrej Karpathy.md)</span>
+---
+<span class="k">type</span>: <span class="v">entity</span>
+<span class="k">title</span>: <span class="v">"Andrej Karpathy"</span>
+<span class="k">entity_type</span>: <span class="v">person</span>
+<span class="k">role</span>: <span class="v">"AI researcher, OpenAI co-founder"</span>
+<span class="k">created</span>: <span class="v">2026-04-07</span>
+<span class="k">updated</span>: <span class="v">2026-06-04</span>
+<span class="k">status</span>: <span class="v">mature</span>           <span class="c"># seed → developing → mature → evergreen</span>
+<span class="k">confidence</span>: <span class="v">high</span>        <span class="c"># high / medium / low</span>
+<span class="k">tags</span>:
+  - <span class="v">ai-researcher</span>
+  - <span class="v">openai</span>
+<span class="k">related</span>:
+  - <span class="v">"[[LLM Wiki Pattern]]"</span>
+  - <span class="v">"[[Vibe Coding]]"</span>
+<span class="k">sources</span>:
+  - <span class="v">"[[.raw/articles/karpathy-gist.md]]"</span>
+---</div>
+
+<div class="schema"><span class="c"># 概念页示例 (wiki/concepts/LLM Wiki Pattern.md)</span>
+---
+<span class="k">type</span>: <span class="v">concept</span>
+<span class="k">title</span>: <span class="v">"LLM Wiki Pattern"</span>
+<span class="k">complexity</span>: <span class="v">intermediate</span>  <span class="c"># basic / intermediate / advanced</span>
+<span class="k">domain</span>: <span class="v">"knowledge-management"</span>
+<span class="k">aliases</span>: <span class="v">["知识编译", "Karpathy Wiki"]</span>
+<span class="k">status</span>: <span class="v">evergreen</span>
+<span class="k">related</span>:
+  - <span class="v">"[[Andrej Karpathy]]"</span>
+  - <span class="v">"[[RAG]]"</span>
+---</div>
+
+<p style="margin-top:16px"><b>8 种页面类型：</b></p>
+<p>
+<span class="badge b-green">source</span>
+<span class="badge b-green">entity</span>
+<span class="badge b-green">concept</span>
+<span class="badge b-blue">domain</span>
+<span class="badge b-blue">comparison</span>
+<span class="badge b-blue">question</span>
+<span class="badge b-yellow">overview</span>
+<span class="badge b-yellow">meta</span>
+</p>
+
+<p style="margin-top:12px"><b>4 级生命周期：</b> seed（萌芽）→ developing（发展中）→ mature（成熟）→ evergreen（常青）</p>
+</section>
+
+<!-- Hot Cache -->
+<section>
+<h2>Hot Cache — 解决"AI 失忆"</h2>
+
+<div class="concept-box">
+<div class="cb-title">痛点：每次新 session，AI 都是一张白纸</div>
+<div class="concept-flow">
+  <span class="cf-box cf-process">SessionStart Hook</span>
+  <span class="cf-arrow">→</span>
+  <span class="cf-box cf-output">自动读取 wiki/hot.md</span>
+  <span class="cf-arrow">→</span>
+  <span class="cf-box cf-input">~500 词即时上下文</span>
+</div>
+<p style="color:#64748b; font-size:0.85em; margin-top:12px">
+Hot Cache 是约 500 词的近期上下文摘要。每次 Claude Code session 启动时自动加载。<br>
+Session 结束时，Stop Hook 检测 wiki 变更并提示更新 hot.md。<br>
+效果：<b>新 session 秒回，不需要重新 "你还记得吗？"</b>
+</p>
+</div>
+</section>
+
+<!-- Lint -->
+<section>
+<h2>Lint — 10 类健康检查</h2>
+
+<div class="workflow">
+<div class="wf-title">输入 "lint the wiki" 后执行：</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">1</div><div class="wf-content"><b>孤立页面</b> — 没有任何入站链接的页面</div></div>
+  <div class="wf-step"><div class="wf-num">2</div><div class="wf-content"><b>死链接</b> — [[wikilink]] 指向不存在的页面</div></div>
+  <div class="wf-step"><div class="wf-num">3</div><div class="wf-content"><b>陈旧声明</b> — 被更新来源矛盾的旧断言</div></div>
+  <div class="wf-step"><div class="wf-num">4</div><div class="wf-content"><b>缺失页面</b> — 多处提到但没有独立页面的概念</div></div>
+  <div class="wf-step"><div class="wf-num">5</div><div class="wf-content"><b>缺失交叉引用</b> — 正文提到实体但未加链接</div></div>
+  <div class="wf-step"><div class="wf-num">6</div><div class="wf-content"><b>Frontmatter 缺失</b> — 缺少必填字段</div></div>
+  <div class="wf-step"><div class="wf-num">7</div><div class="wf-content"><b>空白章节</b> — 标题下没有内容</div></div>
+  <div class="wf-step"><div class="wf-num">8</div><div class="wf-content"><b>陈旧索引</b> — index.md 指向已删除/重命名的页面</div></div>
+  <div class="wf-step"><div class="wf-num">9</div><div class="wf-content"><b>地址验证</b>（DragonScale 可选）</div></div>
+  <div class="wf-step"><div class="wf-num">10</div><div class="wf-content"><b>语义去重</b>（DragonScale 可选）— 嵌入余弦相似度检测重复</div></div>
+</div>
+<div class="wf-note">📋 输出报告到 wiki/meta/lint-report-YYYY-MM-DD.md。分为"可自动修复"和"需人工审核"两级。建议每 10-15 次 ingest 后运行一次。</div>
+</div>
+</section>
+
+<!-- Cross-project -->
+<section>
+<h2>跨项目使用</h2>
+
+<p>任何 Claude Code 项目都可以引用这个知识库。在其他项目的 <code>CLAUDE.md</code> 中加入：</p>
+
+<div class="schema"><span class="c">## Wiki 知识库</span>
+<span class="c">Path: D:\code\personal-context</span>
+<span class="c"></span>
+<span class="c">需要上下文时：</span>
+<span class="c">1. 先读 wiki/hot.md（近期缓存）</span>
+<span class="c">2. 不够则读 wiki/index.md</span>
+<span class="c">3. 需要细节则读具体 wiki 页面</span>
+<span class="c"></span>
+<span class="c">不要用 wiki 回答通用编程问题。</span></div>
+
+<p>这样你的运维项目、代码项目、内容项目都能共享同一个知识库。</p>
+</section>
+
+<!-- Tips -->
+<section>
+<h2>使用技巧</h2>
+
+<div class="tip-grid">
+  <div class="tip">
+    <div class="emoji">⚡</div>
+    <div class="title">先 ingest 再问问题</div>
+    <div class="body">知识库的价值在于积累。先喂 5-10 篇核心文章，再开始提问。空库上提问等于用训练数据回答。</div>
+  </div>
+  <div class="tip">
+    <div class="emoji">🔄</div>
+    <div class="title">/save 保存好答案</div>
+    <div class="body">一个精彩的分析对话，用 /save 存回 wiki。下次问类似问题时直接从 wiki 读取，不用重新推理。</div>
+  </div>
+  <div class="tip">
+    <div class="emoji">🏷️</div>
+    <div class="title">利用 status 生命周期</div>
+    <div class="body">新页面是 seed，多次引用后升为 developing，验证后升为 mature。Evergreen 是永远有效的核心概念。</div>
+  </div>
+  <div class="tip">
+    <div class="emoji">⚔️</div>
+    <div class="title">矛盾不是 bug</div>
+    <div class="body">[!contradiction] callout 是特性。新旧信息冲突时双向标注，让你后续裁决。知识是演化的，不是静态的。</div>
+  </div>
+  <div class="tip">
+    <div class="emoji">📊</div>
+    <div class="title">定期 lint</div>
+    <div class="body">每 10-15 次 ingest 后跑一次 lint。它会告诉你哪些知识是孤岛、哪些概念该有独立页面但还没有。</div>
+  </div>
+  <div class="tip">
+    <div class="emoji">🌐</div>
+    <div class="title">URL 直接 ingest</div>
+    <div class="body">看到好文章直接 "ingest https://..." 不用手动保存。Claude 会用 defuddle 去杂质后自动编译。</div>
+  </div>
+</div>
+</section>
+
+<!-- Daily Workflow -->
+<section>
+<h2>日常工作流示例</h2>
+
+<div class="workflow">
+<div class="wf-title">🌅 早晨：开始新 session</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">→</div><div class="wf-content">SessionStart Hook 自动加载 hot.md → Claude 已知你最近在研究什么</div></div>
+</div>
+</div>
+
+<div class="workflow">
+<div class="wf-title">📖 阅读时：发现好文章</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">→</div><div class="wf-content"><code>ingest https://interesting-article.com</code> → 自动编译进知识库</div></div>
+</div>
+</div>
+
+<div class="workflow">
+<div class="wf-title">🤔 工作中：需要知识支持</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">→</div><div class="wf-content"><code>what do you know about Flink exactly-once 语义？</code> → 从 wiki 综合回答</div></div>
+</div>
+</div>
+
+<div class="workflow">
+<div class="wf-title">💡 讨论后：产生了有价值的洞察</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">→</div><div class="wf-content"><code>/save</code> → 对话精华永久存入 wiki</div></div>
+</div>
+</div>
+
+<div class="workflow">
+<div class="wf-title">🔬 周末：深入研究一个主题</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">→</div><div class="wf-content"><code>/autoresearch AI Agent 记忆系统设计</code> → 自动搜索 + 综合 + 入库</div></div>
+</div>
+</div>
+
+<div class="workflow">
+<div class="wf-title">🧹 每周：维护一次</div>
+<div class="wf-steps">
+  <div class="wf-step"><div class="wf-num">→</div><div class="wf-content"><code>lint the wiki</code> → 清理孤页、补充缺失引用、发现知识空白</div></div>
+</div>
+</div>
+</section>
+
+</div>
+
+<footer>
+  claude-obsidian v1.9.2 使用指南 · 基于 Karpathy LLM Wiki 模式<br>
+  项目地址：<a href="https://github.com/AgriciDaniel/claude-obsidian">github.com/AgriciDaniel/claude-obsidian</a>
+</footer>
+
+</body>
+</html>
